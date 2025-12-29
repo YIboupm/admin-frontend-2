@@ -1,0 +1,64 @@
+<!-- 通用占位页面 -->
+<section class="page-content" id="page-placeholder">
+    <div class="page-header">
+        <div class="page-header-left">
+            <h2 id="placeholderTitle">功能名称</h2>
+            <p id="placeholderSubtitle">功能描述</p>
+        </div>
+        <div class="page-header-right">
+            <button class="btn btn-primary" id="placeholderActionBtn" style="display: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                <span>新建</span>
+            </button>
+        </div>
+    </div>
+    <div class="coming-soon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <h3>即将推出</h3>
+        <p id="placeholderMessage">此功能正在开发中...</p>
+    </div>
+</section>
+
+<script>
+// 根据页面参数自定义内容
+(function() {
+    'use strict';
+    
+    const pageConfigs = {
+        reading: {
+            title: '阅读材料管理',
+            subtitle: '管理 SIELE 阅读理解文章和题目',
+            message: '阅读材料管理功能正在开发中...'
+        },
+        stories: {
+            title: '故事管理',
+            subtitle: '管理西班牙语分级阅读故事',
+            message: '故事管理功能正在开发中...'
+        },
+        places: {
+            title: '旅游地点管理',
+            subtitle: '管理西语国家旅游景点内容',
+            message: '旅游地点管理功能正在开发中...'
+        },
+        countries: {
+            title: '国家/城市管理',
+            subtitle: '管理旅游目的地国家和城市',
+            message: '国家/城市管理功能正在开发中...'
+        }
+    };
+    
+    // 从 URL 或全局变量获取当前页面类型
+    const currentPage = window.currentPlaceholderPage || 'reading';
+    const config = pageConfigs[currentPage] || pageConfigs.reading;
+    
+    document.getElementById('placeholderTitle').textContent = config.title;
+    document.getElementById('placeholderSubtitle').textContent = config.subtitle;
+    document.getElementById('placeholderMessage').textContent = config.message;
+})();
+</script>

@@ -1,0 +1,1250 @@
+/* ===================================
+   题目管理模块样式 - questions.css
+   对语言老师友好的可视化编辑器
+   =================================== */
+
+/* ===================================
+   模态框尺寸扩展
+   =================================== */
+.modal-xl {
+    max-width: 1200px;
+    width: 95vw;
+    max-height: 90vh;
+}
+
+.modal-xl .modal-body {
+    max-height: calc(90vh - 140px);
+    overflow-y: auto;
+    padding: 0;
+}
+
+/* ===================================
+   题目管理工具栏
+   =================================== */
+.questions-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.toolbar-left,
+.toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.form-group-inline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-group-inline label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-light);
+    white-space: nowrap;
+}
+
+.form-group-inline select {
+    min-width: 80px;
+}
+
+/* ===================================
+   主编辑器布局 - 左右分栏
+   =================================== */
+.questions-editor-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    min-height: 500px;
+    background: #fff;
+}
+
+/* 左侧 Block 列表 */
+.blocks-sidebar {
+    background: #f8f9fa;
+    border-right: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+}
+
+.blocks-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.blocks-header h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0;
+}
+
+.blocks-count {
+    font-size: 0.75rem;
+    color: var(--color-text-light);
+    background: var(--color-border);
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.blocks-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+}
+
+.block-item {
+    background: #fff;
+    border: 2px solid transparent;
+    border-radius: var(--radius-md);
+    padding: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.block-item:hover {
+    border-color: var(--color-border);
+    box-shadow: var(--shadow-sm);
+}
+
+.block-item.active {
+    border-color: var(--color-accent);
+    background: linear-gradient(135deg, #fff5f7 0%, #fff 100%);
+}
+
+.block-item.dragging {
+    opacity: 0.5;
+    transform: scale(0.98);
+}
+
+.block-item-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.drag-handle {
+    cursor: grab;
+    color: var(--color-text-muted);
+    font-size: 14px;
+    padding: 2px;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.type-badge.mcq { background: #e3f2fd; color: #1565c0; }
+.type-badge.matrix { background: #fce4ec; color: #c2185b; }
+.type-badge.matching { background: #e8f5e9; color: #2e7d32; }
+.type-badge.ordering { background: #fff3e0; color: #ef6c00; }
+.type-badge.fill_blank { background: #f3e5f5; color: #7b1fa2; }
+.type-badge.true_false { background: #e0f7fa; color: #00838f; }
+
+.block-item-preview {
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.block-item-actions {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.block-item:hover .block-item-actions {
+    opacity: 1;
+}
+
+.block-item-actions .btn-icon {
+    width: 24px;
+    height: 24px;
+    padding: 4px;
+}
+
+.blocks-footer {
+    padding: 12px;
+    border-top: 1px solid var(--color-border);
+}
+
+.btn-add-block {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-add-block:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(233, 69, 96, 0.3);
+}
+
+/* 右侧编辑器区域 */
+.block-editor-panel {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+}
+
+.editor-empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-muted);
+    padding: 40px;
+    text-align: center;
+}
+
+.editor-empty-state svg {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+}
+
+.editor-empty-state p {
+    font-size: 1rem;
+    margin-bottom: 8px;
+}
+
+.editor-empty-state small {
+    font-size: 0.8rem;
+}
+
+/* ===================================
+   题型选择器
+   =================================== */
+.question-type-selector {
+    padding: 24px;
+}
+
+.question-type-selector h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--color-text);
+}
+
+.type-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.type-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 16px;
+    background: #fff;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.type-card:hover {
+    border-color: var(--color-accent);
+    background: #fff5f7;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.type-icon-large {
+    font-size: 2rem;
+}
+
+.type-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.type-desc {
+    font-size: 0.7rem;
+    color: var(--color-text-light);
+    text-align: center;
+}
+
+/* ===================================
+   Block 编辑器表单
+   =================================== */
+.block-editor-form {
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.editor-section {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.editor-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.editor-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.editor-section-header h5 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--color-text);
+    margin-bottom: 6px;
+}
+
+.form-group label .required {
+    color: var(--color-accent);
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    transition: border-color var(--transition-fast);
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-group small {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--color-text-light);
+    margin-top: 4px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+/* ===================================
+   单选题编辑器
+   =================================== */
+.options-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.option-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #f8f9fa;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+}
+
+.option-row.correct {
+    background: #e8f5e9;
+    border-color: #a5d6a7;
+}
+
+.option-row input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--color-success);
+}
+
+.option-row .option-label {
+    font-weight: 600;
+    color: var(--color-text);
+    min-width: 24px;
+}
+
+.option-row .option-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 0;
+}
+
+.option-row .option-input:focus {
+    outline: none;
+}
+
+.option-row .btn-icon {
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.option-row:hover .btn-icon {
+    opacity: 1;
+}
+
+/* ===================================
+   矩阵单选题编辑器 - 核心新增
+   =================================== */
+.matrix-editor {
+    background: #f8f9fa;
+    border-radius: var(--radius-md);
+    padding: 16px;
+}
+
+.matrix-columns-editor {
+    margin-bottom: 20px;
+}
+
+.matrix-columns-editor h6 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 10px;
+}
+
+.columns-list {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.column-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+}
+
+.column-item .column-key {
+    font-weight: 600;
+    color: var(--color-accent);
+    min-width: 24px;
+}
+
+.column-item input {
+    border: none;
+    background: transparent;
+    padding: 0;
+    width: 120px;
+}
+
+.column-item input:focus {
+    outline: none;
+}
+
+.matrix-rows-editor h6 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+}
+
+.matrix-table th,
+.matrix-table td {
+    padding: 10px 12px;
+    text-align: center;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.matrix-table th {
+    background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.matrix-table th.col-header {
+    min-width: 100px;
+}
+
+.matrix-table td.row-number {
+    width: 50px;
+    font-weight: 600;
+    color: var(--color-accent);
+    background: #fafafa;
+}
+
+.matrix-table td.row-text {
+    text-align: left;
+    min-width: 300px;
+}
+
+.matrix-table td.row-text textarea {
+    width: 100%;
+    border: none;
+    background: transparent;
+    resize: none;
+    padding: 0;
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+.matrix-table td.row-text textarea:focus {
+    outline: none;
+}
+
+.matrix-table td.col-option {
+    width: 80px;
+}
+
+.matrix-table td.col-option input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--color-success);
+    cursor: pointer;
+}
+
+.matrix-table td.row-actions {
+    width: 40px;
+}
+
+.matrix-table tr:hover {
+    background: #f8f9fa;
+}
+
+.matrix-table tr.dragging {
+    background: #e3f2fd;
+}
+
+.add-row-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    padding: 12px;
+    margin-top: 12px;
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text-light);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.add-row-btn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: #fff5f7;
+}
+
+/* 批量粘贴模式 */
+.batch-paste-mode {
+    margin-top: 16px;
+    padding: 16px;
+    background: #fff;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+}
+
+.batch-paste-mode h6 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 8px;
+}
+
+.batch-paste-mode textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    resize: vertical;
+}
+
+.batch-paste-mode small {
+    display: block;
+    color: var(--color-text-light);
+    font-size: 0.75rem;
+    margin-top: 6px;
+}
+
+.batch-paste-mode .btn {
+    margin-top: 10px;
+}
+
+/* ===================================
+   匹配题编辑器
+   =================================== */
+.matching-editor {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.matching-column h6 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 10px;
+}
+
+.matching-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.matching-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: #f8f9fa;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+}
+
+.matching-item .item-label {
+    font-weight: 600;
+    color: var(--color-text);
+    min-width: 24px;
+}
+
+.matching-item input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 0;
+}
+
+.matching-item input:focus {
+    outline: none;
+}
+
+.matching-pairs {
+    margin-top: 20px;
+    padding: 16px;
+    background: #f0f7ff;
+    border-radius: var(--radius-sm);
+}
+
+.matching-pairs h6 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 10px;
+}
+
+.pair-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.pair-row span {
+    font-weight: 500;
+}
+
+.pair-row select {
+    padding: 6px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: #fff;
+}
+
+/* ===================================
+   排序题编辑器
+   =================================== */
+.ordering-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.order-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    cursor: grab;
+}
+
+.order-item:active {
+    cursor: grabbing;
+}
+
+.order-item.dragging {
+    opacity: 0.5;
+    background: #e3f2fd;
+}
+
+.order-item .order-number {
+    width: 28px;
+    height: 28px;
+    background: var(--color-accent);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.order-item input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 0;
+    font-size: 0.875rem;
+}
+
+.order-item input:focus {
+    outline: none;
+}
+
+/* ===================================
+   填空题编辑器
+   =================================== */
+.fill-blank-editor .text-area {
+    position: relative;
+}
+
+.fill-blank-editor .highlighted-text {
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    min-height: 100px;
+    line-height: 1.8;
+}
+
+.fill-blank-editor .blank-placeholder {
+    display: inline-block;
+    min-width: 60px;
+    padding: 2px 8px;
+    background: var(--color-accent);
+    color: #fff;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.answers-list {
+    margin-top: 16px;
+}
+
+.answers-list h6 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 10px;
+}
+
+.answer-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.answer-item .answer-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    min-width: 60px;
+}
+
+.answer-item input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+}
+
+/* ===================================
+   判断题编辑器
+   =================================== */
+.true-false-editor {
+    display: flex;
+    gap: 16px;
+}
+
+.tf-option {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px;
+    background: #f8f9fa;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.tf-option:hover {
+    border-color: var(--color-text-light);
+}
+
+.tf-option.selected {
+    border-color: var(--color-success);
+    background: #e8f5e9;
+}
+
+.tf-option input[type="radio"] {
+    display: none;
+}
+
+.tf-option .tf-icon {
+    font-size: 1.5rem;
+}
+
+.tf-option .tf-label {
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+/* ===================================
+   Instructions 编辑器
+   =================================== */
+.instructions-editor {
+    padding: 20px;
+    background: linear-gradient(135deg, #f0f7ff 0%, #fff 100%);
+    border-radius: var(--radius-md);
+    margin-bottom: 16px;
+}
+
+.instructions-editor h5 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.instructions-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.instructions-tab {
+    padding: 8px 16px;
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.instructions-tab.active {
+    background: var(--color-accent);
+    color: #fff;
+    border-color: var(--color-accent);
+}
+
+/* ===================================
+   JSON 编辑器
+   =================================== */
+.questions-json-editor {
+    width: 100%;
+    min-height: 400px;
+    padding: 16px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: #1e1e1e;
+    color: #d4d4d4;
+    resize: vertical;
+}
+
+.questions-json-editor:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+/* ===================================
+   可视化编辑器容器
+   =================================== */
+.questions-visual-editor {
+    min-height: 500px;
+}
+
+/* ===================================
+   按钮样式增强
+   =================================== */
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+}
+
+.btn-sm svg {
+    width: 14px;
+    height: 14px;
+}
+
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    color: var(--color-text-light);
+}
+
+.btn-icon:hover {
+    background: var(--color-border);
+    color: var(--color-text);
+}
+
+.btn-icon.btn-danger:hover {
+    background: #fef0f0;
+    color: var(--color-error);
+}
+
+.btn-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* ===================================
+   空状态
+   =================================== */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+.empty-state svg {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 12px;
+    opacity: 0.3;
+}
+
+/* ===================================
+   响应式适配
+   =================================== */
+@media (max-width: 900px) {
+    .questions-editor-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .blocks-sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--color-border);
+        max-height: 200px;
+    }
+    
+    .type-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .matching-editor {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===================================
+   动画效果
+   =================================== */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.block-item {
+    animation: slideIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.block-editor-form {
+    animation: fadeIn 0.2s ease;
+}
+
+/* ===================================
+   Toast 提示增强
+   =================================== */
+.toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+
+.toast {
+    padding: 12px 20px;
+    border-radius: var(--radius-sm);
+    color: #fff;
+    font-size: 0.875rem;
+    margin-top: 8px;
+    animation: slideIn 0.3s ease;
+}
+
+.toast.success {
+    background: var(--color-success);
+}
+
+.toast.error {
+    background: var(--color-error);
+}
+
+.toast.warning {
+    background: var(--color-warning);
+}
+
+/* ===================================
+   解析编辑器样式
+   =================================== */
+.explanation-section {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 2px dashed var(--color-border);
+    background: linear-gradient(135deg, #fffef5 0%, #fff 100%);
+    border-radius: var(--radius-md);
+    padding: 20px;
+}
+
+.explanation-section h5 {
+    color: #f4a261;
+    margin-bottom: 16px;
+}
+
+.explanation-editor-wrapper {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: #fff;
+}
+
+.explanation-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+    border-bottom: 1px solid var(--color-border);
+    flex-wrap: wrap;
+}
+
+.toolbar-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 4px 8px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: var(--color-text);
+    transition: all var(--transition-fast);
+}
+
+.toolbar-btn:hover {
+    background: var(--color-bg);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.toolbar-btn:active {
+    transform: scale(0.95);
+}
+
+.toolbar-divider {
+    width: 1px;
+    height: 20px;
+    background: var(--color-border);
+    margin: 0 6px;
+}
+
+.explanation-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 12px;
+    border: none;
+    resize: vertical;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    font-family: var(--font-sans);
+}
+
+.explanation-textarea:focus {
+    outline: none;
+}
+
+.explanation-textarea::placeholder {
+    color: var(--color-text-muted);
+}
+
+.explanation-preview {
+    padding: 16px;
+    min-height: 120px;
+    background: #fafafa;
+    border-top: 1px solid var(--color-border);
+    font-size: 0.875rem;
+    line-height: 1.8;
+}
+
+.explanation-preview ul,
+.explanation-preview ol {
+    margin: 8px 0;
+    padding-left: 24px;
+}
+
+.explanation-preview li {
+    margin: 4px 0;
+}
+
+.explanation-preview mark {
+    background: #fff3cd;
+    padding: 2px 4px;
+    border-radius: 2px;
+}
+
+.explanation-preview b,
+.explanation-preview strong {
+    color: var(--color-accent);
+}
+
+/* 解析编辑器响应式 */
+@media (max-width: 600px) {
+    .explanation-toolbar {
+        gap: 2px;
+    }
+    
+    .toolbar-btn {
+        min-width: 28px;
+        height: 28px;
+        padding: 2px 6px;
+        font-size: 0.75rem;
+    }
+    
+    .toolbar-divider {
+        margin: 0 4px;
+    }
+}

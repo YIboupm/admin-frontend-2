@@ -1,0 +1,425 @@
+/* ===================================
+   听力管理模块样式 - listening_admin.css
+   支持多文件上传、排序功能
+   =================================== */
+
+/* ===== 子视图切换标签 ===== */
+.subtabs {
+    display: flex;
+    gap: 4px;
+    background: #f1f3f4;
+    padding: 4px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    width: fit-content;
+}
+
+.subtab {
+    padding: 8px 20px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #5f6368;
+    transition: all 0.2s ease;
+}
+
+.subtab:hover {
+    color: #202124;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.subtab.active {
+    background: white;
+    color: #e94560;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* ===== 徽章样式 ===== */
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.badge-dele {
+    background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+    color: white;
+}
+
+.badge-siele {
+    background: linear-gradient(135deg, #3498db 0%, #5dade2 100%);
+    color: white;
+}
+
+.badge-level {
+    background: #f1f3f4;
+    color: #5f6368;
+    border: 1px solid #e0e0e0;
+}
+
+.badge-success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.badge-warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.badge-error {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.badge-info {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+/* ===== 音频数量徽章 ===== */
+.audio-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 6px;
+    border-radius: 12px;
+    background: #f1f3f4;
+    color: #5f6368;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.audio-count.has-audio {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+/* ===== 音频序号徽章 ===== */
+.audio-order-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+/* ===== 排序按钮 ===== */
+.sort-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: center;
+}
+
+.btn-sort {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 20px;
+    padding: 0;
+    border: 1px solid #e0e0e0;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-sort:hover:not(:disabled) {
+    background: #f1f3f4;
+    border-color: #667eea;
+}
+
+.btn-sort:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.btn-sort svg {
+    width: 14px;
+    height: 14px;
+    stroke: #5f6368;
+}
+
+.btn-sort:hover:not(:disabled) svg {
+    stroke: #667eea;
+}
+
+/* ===== 音频标题输入框 ===== */
+.audio-title-input {
+    width: 100%;
+    max-width: 200px;
+    padding: 6px 10px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 13px;
+    background: transparent;
+    transition: all 0.2s ease;
+}
+
+.audio-title-input:hover {
+    background: #f8f9fa;
+}
+
+.audio-title-input:focus {
+    outline: none;
+    border-color: #667eea;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* ===== 待上传文件列表 ===== */
+.pending-audios-list {
+    background: #f8f9fa;
+    border: 2px dashed #e0e0e0;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.pending-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.pending-header strong {
+    color: #202124;
+    font-size: 14px;
+}
+
+.pending-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pending-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+    transition: all 0.15s ease;
+}
+
+.pending-item:hover {
+    border-color: #667eea;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+}
+
+.pending-item-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.pending-order {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #667eea;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.pending-title-input {
+    flex: 1;
+    max-width: 300px;
+    padding: 6px 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.pending-title-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.pending-size {
+    color: #5f6368;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.pending-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* ===== 拖拽上传状态 ===== */
+.drag-over {
+    border-color: #667eea !important;
+    background: rgba(102, 126, 234, 0.05) !important;
+}
+
+#audioUploadBox {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#audioUploadBox:hover {
+    border-color: #667eea;
+}
+
+/* ===== 操作按钮图标 ===== */
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-icon svg {
+    width: 18px;
+    height: 18px;
+    stroke: #5f6368;
+}
+
+.btn-icon:hover {
+    background: #f1f3f4;
+}
+
+.btn-icon:hover svg {
+    stroke: #202124;
+}
+
+.btn-icon.btn-danger:hover {
+    background: #fef0f0;
+}
+
+.btn-icon.btn-danger:hover svg {
+    stroke: #e94560;
+}
+
+/* ===== 视图隐藏 ===== */
+.listening-view.hidden {
+    display: none;
+}
+
+/* ===== 表格调整 ===== */
+#tareaAudiosTable th:first-child,
+#tareaAudiosTable td:first-child {
+    width: 60px;
+    text-align: center;
+}
+
+#tareaAudiosTable th:nth-child(5),
+#tareaAudiosTable td:nth-child(5) {
+    width: 60px;
+    text-align: center;
+}
+
+/* ===== 响应式调整 ===== */
+@media (max-width: 768px) {
+    .subtabs {
+        width: 100%;
+    }
+    
+    .subtab {
+        flex: 1;
+        text-align: center;
+    }
+    
+    .pending-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .pending-item-info {
+        width: 100%;
+    }
+    
+    .pending-title-input {
+        max-width: 100%;
+    }
+    
+    .pending-item-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .audio-title-input {
+        max-width: 150px;
+    }
+}
+
+/* ===== 加载状态 ===== */
+.table-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: #5f6368;
+}
+
+.loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #f1f3f4;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===== 空状态 ===== */
+.table-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: #5f6368;
+    text-align: center;
+}
+
+.table-empty svg {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    stroke: #e0e0e0;
+}
+
+.table-empty p {
+    margin-bottom: 16px;
+    font-size: 16px;
+}

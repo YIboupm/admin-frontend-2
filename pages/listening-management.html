@@ -1,0 +1,363 @@
+<!-- 听力管理页面 -->
+<section class="page-content" id="page-listening">
+    <div class="page-header">
+        <div class="page-header-left">
+            <h2>听力管理</h2>
+            <p>管理听力任务（Tareas）、听力音频与素材库</p>
+        </div>
+        <div class="page-header-right">
+            <button class="btn btn-primary" id="btnAddTarea" onclick="showTareaModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                <span>新建 Tarea</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 子视图切换 -->
+    <div class="subtabs">
+        <button class="subtab active" data-view="tareas">Tareas</button>
+        <button class="subtab" data-view="materials">素材库</button>
+    </div>
+
+    <!-- Tareas 管理视图 -->
+    <div class="listening-view" id="listeningViewTareas">
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label>考试类型</label>
+                <select id="filterListeningExamType" class="filter-select">
+                    <option value="">全部</option>
+                    <option value="DELE">DELE</option>
+                    <option value="SIELE">SIELE</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>级别</label>
+                <select id="filterListeningTareaLevel" class="filter-select">
+                    <option value="">全部</option>
+                    <option value="A1">A1</option>
+                    <option value="A2">A2</option>
+                    <option value="B1">B1</option>
+                    <option value="B2">B2</option>
+                    <option value="C1">C1</option>
+                    <option value="C2">C2</option>
+                </select>
+            </div>
+            <div class="filter-group filter-search">
+                <label>搜索</label>
+                <input type="text" id="filterListeningTareaSearch" placeholder="搜索标题或编号..." class="filter-input">
+            </div>
+            <button class="btn btn-secondary" id="btnApplyListeningTareaFilter">
+                <span>筛选</span>
+            </button>
+        </div>
+
+        <div class="data-table-container">
+            <table class="data-table" id="listeningTareasTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>标题</th>
+                        <th>考试类型</th>
+                        <th>级别</th>
+                        <th>任务编号</th>
+                        <th>音频数</th>
+                        <th>创建时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="listeningTareasBody">
+                    <!-- 动态填充 -->
+                </tbody>
+            </table>
+
+            <div class="table-empty hidden" id="listeningTareasEmpty">
+                <p>暂无 Tarea</p>
+                <button class="btn btn-primary" onclick="showTareaModal()">创建第一个 Tarea</button>
+            </div>
+
+            <div class="table-loading hidden" id="listeningTareasLoading">
+                <div class="loading-spinner"></div>
+                <p>加载中...</p>
+            </div>
+        </div>
+
+        <div class="pagination" id="listeningTareasPagination"></div>
+    </div>
+
+    <!-- 素材库视图 -->
+    <div class="listening-view hidden" id="listeningViewMaterials">
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label>级别</label>
+                <select id="filterListeningLevel" class="filter-select">
+                    <option value="">全部</option>
+                    <option value="A1">A1</option>
+                    <option value="A2">A2</option>
+                    <option value="B1">B1</option>
+                    <option value="B2">B2</option>
+                    <option value="C1">C1</option>
+                    <option value="C2">C2</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>口音</label>
+                <select id="filterListeningAccent" class="filter-select">
+                    <option value="">全部</option>
+                    <option value="Latin">Latin</option>
+                    <option value="Castilian">Castilian</option>
+                </select>
+            </div>
+            <div class="filter-group filter-search">
+                <label>搜索</label>
+                <input type="text" id="filterListeningSearch" placeholder="搜索转录/标题..." class="filter-input">
+            </div>
+            <button class="btn btn-secondary" id="btnApplyListeningFilter">
+                <span>筛选</span>
+            </button>
+        </div>
+
+        <div class="data-table-container">
+            <table class="data-table" id="listeningMaterialsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>文件名</th>
+                        <th>级别</th>
+                        <th>口音</th>
+                        <th>时长</th>
+                        <th>状态</th>
+                        <th>创建时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="listeningMaterialsBody">
+                    <!-- listening.js 填充 -->
+                </tbody>
+            </table>
+
+            <div class="table-empty hidden" id="listeningMaterialsEmpty">
+                <p>暂无素材</p>
+            </div>
+
+            <div class="table-loading hidden" id="listeningMaterialsLoading">
+                <div class="loading-spinner"></div>
+                <p>加载中...</p>
+            </div>
+        </div>
+
+        <div class="pagination" id="listeningMaterialsPagination"></div>
+    </div>
+</section>
+
+<!-- Tarea 模态框 -->
+<div class="modal-overlay hidden" id="tareaModal">
+    <div class="modal modal-sm">
+        <div class="modal-header">
+            <h3 id="tareaModalTitle">新建 Tarea</h3>
+            <button class="modal-close" onclick="closeTareaModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="tareaForm">
+                <input type="hidden" id="tareaId" name="tareaId">
+                <div class="form-group">
+                    <label for="tareaExamType">考试类型</label>
+                    <select id="tareaExamType" name="exam_type">
+                        <option value="DELE">DELE</option>
+                        <option value="SIELE">SIELE</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tareaLevel">级别</label>
+                    <select id="tareaLevel" name="level">
+                        <option value="A1">A1</option>
+                        <option value="A2">A2</option>
+                        <option value="B1">B1</option>
+                        <option value="B2">B2</option>
+                        <option value="C1">C1</option>
+                        <option value="C2">C2</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tareaNumber">任务编号</label>
+                    <input type="number" id="tareaNumber" name="tarea_number" min="1">
+                </div>
+                <div class="form-group">
+                    <label for="tareaTitle">标题</label>
+                    <input type="text" id="tareaTitle" name="title">
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeTareaModal()">取消</button>
+            <button type="button" class="btn btn-primary" id="btnSaveTarea">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- Tarea Audios 模态框 -->
+<div class="modal-overlay hidden" id="tareaAudiosModal">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h3 id="tareaAudiosTitle">Tarea 音频</h3>
+            <button class="modal-close" onclick="closeTareaAudiosModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div id="tareaAudiosContent">
+                <div class="form-group">
+                    <label>上传音频（支持多选，最多6个）</label>
+                    <div id="audioUploadBox" class="file-upload-box" style="border: 2px dashed #e0e0e0; border-radius: 8px; padding: 20px; text-align: center; cursor: pointer;" onclick="document.getElementById('tareaAudioFileInput').click()">
+                        <input type="file" id="tareaAudioFileInput" accept="audio/*" multiple hidden>
+                        <div style="color: #5f6368;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 32px; height: 32px; margin-bottom: 8px;">
+                                <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+                            </svg>
+                            <p style="margin: 0; font-size: 14px;">点击选择或拖拽音频文件到此处</p>
+                            <small style="color: #999;">支持 MP3/WAV/M4A/OGG 格式，单个最大 50MB</small>
+                        </div>
+                    </div>
+                    <!-- 待上传文件列表 -->
+                    <div id="pendingAudiosList" class="pending-audios-list" style="display: none;"></div>
+                </div>
+
+                <!-- 上传按钮 -->
+                <div class="form-group">
+                    <button class="btn btn-primary" id="btnUploadTareaAudio">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px; margin-right: 6px;">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        上传并处理
+                    </button>
+                </div>
+
+                <div class="data-table-container">
+                    <table class="data-table" id="tareaAudiosTable">
+                        <thead>
+                            <tr>
+                                <th style="width:50px;">序号</th>
+                                <th>标题</th>
+                                <th style="width:80px;">状态</th>
+                                <th style="width:100px;">素材ID</th>
+                                <th style="width:60px;">排序</th>
+                                <th style="width:80px;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tareaAudiosBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeTareaAudiosModal()">关闭</button>
+        </div>
+    </div>
+</div>
+
+<!-- Tarea Questions 模态框 -->
+<div class="modal-overlay hidden" id="tareaQuestionsModal">
+    <div class="modal modal-xl">
+        <div class="modal-header">
+            <h3 id="tareaQuestionsTitle">Tarea 题目管理</h3>
+            <button class="modal-close" onclick="closeTareaQuestionsModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <!-- 工具栏 -->
+            <div class="questions-toolbar">
+                <div class="toolbar-left">
+                    <div class="form-group-inline">
+                        <label>版本</label>
+                        <select id="tareaQuestionsVersion"></select>
+                    </div>
+                    <button class="btn btn-sm btn-danger" id="btnDeleteTareaQuestionsVersion">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                        删除版本
+                    </button>
+                </div>
+                <div class="toolbar-right">
+                    <button class="btn btn-sm btn-secondary" id="btnToggleEditMode">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="16 18 22 12 16 6"/>
+                            <polyline points="8 6 2 12 8 18"/>
+                        </svg>
+                        <span>JSON 编辑</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 可视化编辑器 -->
+            <div id="tareaQuestionsVisualEditor" class="questions-visual-editor">
+                <!-- 动态渲染 -->
+            </div>
+
+            <!-- JSON 编辑器 -->
+            <textarea id="tareaQuestionsJsonEditor" class="questions-json-editor hidden" rows="20"></textarea>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeTareaQuestionsModal()">取消</button>
+            <button type="button" class="btn btn-primary" id="btnSaveTareaQuestions">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                    <polyline points="17 21 17 13 7 13 7 21"/>
+                    <polyline points="7 3 7 8 15 8"/>
+                </svg>
+                保存题目
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 题目编辑器模态框 -->
+<div class="modal-overlay hidden" id="questionEditorModal">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h3 id="questionEditorTitle">编辑题目</h3>
+            <button class="modal-close" onclick="closeQuestionEditorModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div id="questionEditorContent">
+                <!-- 动态渲染 -->
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeQuestionEditorModal()">取消</button>
+            <button type="button" class="btn btn-primary" onclick="saveQuestionEdit()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                保存
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="js/listening.js"></script>
+<script src="js/listening_admin.js"></script>
+<script src="js/listening_tareas.js"></script>
+<script src="js/listening_questions.js"></script>

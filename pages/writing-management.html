@@ -1,0 +1,286 @@
+<!-- 写作任务页面 -->
+<section class="page-content" id="page-writing">
+    <div class="page-header">
+        <div class="page-header-left">
+            <h2>写作任务管理</h2>
+            <p>创建和管理 DELE/SIELE 写作练习题</p>
+        </div>
+        <div class="page-header-right">
+            <button class="btn btn-primary" id="btnAddWritingTask">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                <span>新建任务</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 筛选栏 -->
+    <div class="filter-bar">
+        <div class="filter-group">
+            <label>考试类型</label>
+            <select id="filterExamType" class="filter-select">
+                <option value="">全部</option>
+                <option value="DELE">DELE</option>
+                <option value="SIELE">SIELE</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>级别</label>
+            <select id="filterLevel" class="filter-select">
+                <option value="">全部</option>
+                <option value="A1">A1</option>
+                <option value="A2">A2</option>
+                <option value="B1">B1</option>
+                <option value="B2">B2</option>
+                <option value="C1">C1</option>
+                <option value="C2">C2</option>
+            </select>
+        </div>
+        <div class="filter-group filter-search">
+            <label>搜索</label>
+            <input type="text" id="filterSearch" placeholder="搜索标题..." class="filter-input">
+        </div>
+        <button class="btn btn-secondary" id="btnApplyFilter">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+            </svg>
+            <span>筛选</span>
+        </button>
+    </div>
+
+    <!-- 任务列表 -->
+    <div class="data-table-container">
+        <table class="data-table" id="writingTasksTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>标题</th>
+                    <th>考试类型</th>
+                    <th>级别</th>
+                    <th>字数要求</th>
+                    <th>媒体</th>
+                    <th>创建时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="writingTasksBody">
+                <!-- 动态填充 -->
+            </tbody>
+        </table>
+        
+        <div class="table-empty hidden" id="writingTasksEmpty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
+                <polyline points="13 2 13 9 20 9"/>
+            </svg>
+            <p>暂无写作任务</p>
+            <button class="btn btn-primary" onclick="showWritingTaskModal()">创建第一个任务</button>
+        </div>
+        
+        <div class="table-loading hidden" id="writingTasksLoading">
+            <div class="loading-spinner"></div>
+            <p>加载中...</p>
+        </div>
+    </div>
+
+    <!-- 分页 -->
+    <div class="pagination" id="writingTasksPagination">
+        <!-- 动态填充 -->
+    </div>
+</section>
+
+<!-- 写作任务模态框 -->
+<div class="modal-overlay hidden" id="writingTaskModal">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h3 id="writingModalTitle">新建写作任务</h3>
+            <button class="modal-close" onclick="closeWritingTaskModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="writingTaskForm">
+                <input type="hidden" id="taskId" name="taskId">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="taskExamType">考试类型 <span class="required">*</span></label>
+                        <select id="taskExamType" name="exam_type" required>
+                            <option value="DELE">DELE</option>
+                            <option value="SIELE">SIELE</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskLevel">级别 <span class="required">*</span></label>
+                        <select id="taskLevel" name="level" required>
+                            <option value="A1">A1</option>
+                            <option value="A2">A2</option>
+                            <option value="B1">B1</option>
+                            <option value="B2">B2</option>
+                            <option value="C1">C1</option>
+                            <option value="C2">C2</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="taskTitle">任务标题 <span class="required">*</span></label>
+                    <input type="text" id="taskTitle" name="title" placeholder="例如：给朋友写一封信" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="taskNumber">任务编号</label>
+                        <input type="number" id="taskNumber" name="task_number" placeholder="1" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="taskSection">部分名称</label>
+                        <input type="text" id="taskSection" name="section" placeholder="Tarea 1">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="taskDescription">题目描述 (HTML)</label>
+                    <textarea id="taskDescription" name="description_html" rows="4" placeholder="任务场景描述..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="taskInstructions">写作要求 (HTML)</label>
+                    <textarea id="taskInstructions" name="instructions_html" rows="4" placeholder="具体写作指令..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="taskVocabulary">推荐词汇 (HTML)</label>
+                    <textarea id="taskVocabulary" name="vocabulary_html" rows="3" placeholder="推荐词汇和短语..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="taskStrategy">破题思路 (HTML)</label>
+                    <textarea id="taskStrategy" name="strategy_html" rows="3" placeholder="写作策略和建议..."></textarea>
+                </div>
+
+                <!-- 音频上传区域 -->
+                <div class="form-group">
+                    <label>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="vertical-align: middle; margin-right: 4px;">
+                            <path d="M9 18V5l12-2v13"/>
+                            <circle cx="6" cy="18" r="3"/>
+                            <circle cx="18" cy="16" r="3"/>
+                        </svg>
+                        听力材料
+                    </label>
+                    <div class="audio-upload-area" id="audioUploadArea">
+                        <div class="audio-preview-list" id="audioPreviewList">
+                            <!-- 动态填充音频预览 -->
+                        </div>
+                        <div class="audio-upload-box" id="audioUploadBox">
+                            <input type="file" id="taskAudioInput" accept="audio/*" multiple hidden>
+                            <div class="upload-placeholder" onclick="document.getElementById('taskAudioInput').click()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 18V5l12-2v13"/>
+                                    <circle cx="6" cy="18" r="3"/>
+                                    <circle cx="18" cy="16" r="3"/>
+                                </svg>
+                                <span>点击或拖拽上传音频文件</span>
+                                <small>支持 MP3、WAV、M4A、OGG、FLAC、AAC，最大 50MB</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="audio-upload-hint">
+                        <span id="audioCountHint">已关联 0 个音频</span>
+                    </div>
+                </div>
+
+                <!-- 图片上传区域 -->
+                <div class="form-group">
+                    <label>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="vertical-align: middle; margin-right: 4px;">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                        任务图片
+                    </label>
+                    <div class="image-upload-area" id="imageUploadArea">
+                        <div class="image-preview-list" id="imagePreviewList">
+                            <!-- 动态填充图片预览 -->
+                        </div>
+                        <div class="image-upload-box" id="imageUploadBox">
+                            <input type="file" id="taskImageInput" accept="image/*" multiple hidden>
+                            <div class="upload-placeholder" onclick="document.getElementById('taskImageInput').click()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                                    <polyline points="21 15 16 10 5 21"/>
+                                </svg>
+                                <span>点击或拖拽上传图片</span>
+                                <small>支持 JPG、PNG、GIF，最大 5MB</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="image-upload-hint">
+                        <span id="imageCountHint">已选择 0 张图片</span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="taskMinWords">最少字数</label>
+                        <input type="number" id="taskMinWords" name="min_words" value="150" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="taskMaxWords">最多字数</label>
+                        <input type="number" id="taskMaxWords" name="max_words" value="250" min="0">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeWritingTaskModal()">取消</button>
+            <button type="button" class="btn btn-primary" id="btnSaveWritingTask">
+                <span class="btn-text">保存</span>
+                <span class="btn-loader hidden">
+                    <svg class="spinner" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"/>
+                    </svg>
+                </span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 确认删除模态框 -->
+<div class="modal-overlay hidden" id="confirmDeleteModal">
+    <div class="modal modal-sm">
+        <div class="modal-header">
+            <h3>确认删除</h3>
+            <button class="modal-close" onclick="closeConfirmDeleteModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="confirm-message">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <p>您确定要删除此项目吗？此操作无法撤销。</p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeConfirmDeleteModal()">取消</button>
+            <button type="button" class="btn btn-danger" id="btnConfirmDelete">删除</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/writing.js"></script>
