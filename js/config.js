@@ -51,6 +51,22 @@ const CONFIG = {
             DETAIL: (id) => `/places/${id}`,
             PARAGRAPHS: (id) => `/places/${id}/paragraphs`,
         },
+        // 口语管理
+        SPEAKING: {
+            TASKS: '/speaking/admin/tasks',
+            TASK_DETAIL: (id) => `/speaking/admin/tasks/${id}`,
+            TASK_AUDIOS: (id) => `/speaking/admin/tasks/${id}/audios`,
+            AUDIO_UPLOAD: (id) => `/speaking/admin/tasks/${id}/audio/upload`,
+            AUDIO_LINK: (id) => `/speaking/admin/tasks/${id}/audio/link`,
+            AUDIO_DETAIL: (taskId, audioId) => `/speaking/admin/tasks/${taskId}/audios/${audioId}`,
+            AUDIOS_REORDER: (id) => `/speaking/admin/tasks/${id}/audios/reorder`,
+            PROCESSING_STATUS: (id) => `/speaking/admin/audio/processing/${id}`,
+            TASK_IMAGES: (id) => `/speaking/admin/tasks/${id}/images`,
+            IMAGE_DETAIL: (taskId, imgId) => `/speaking/admin/tasks/${taskId}/images/${imgId}`,
+            IMAGES_REORDER: (id) => `/speaking/admin/tasks/${id}/images/reorder`,
+            MATERIALS: '/speaking/admin/materials',
+            STATS: '/speaking/admin/stats',
+        },
     },
     
     // 本地存储键名

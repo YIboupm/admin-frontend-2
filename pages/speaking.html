@@ -1,0 +1,341 @@
+<!-- ============================================
+     Speaking 口语任务管理页面
+     文件: pages/speaking.html
+     ============================================ -->
+
+<section class="page-content" id="page-speaking">
+    <div class="page-header">
+        <div class="page-header-left">
+            <h2>口语任务管理</h2>
+            <p class="page-description">管理 DELE/SIELE 考试的口语练习任务</p>
+        </div>
+        <div class="page-header-right">
+            <button class="btn btn-primary" id="btnAddSpeakingTask" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>新建任务</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 筛选栏 -->
+    <div class="filter-bar">
+        <div class="filter-group">
+            <label>考试类型</label>
+            <select class="filter-select" id="speakingFilterExamType">
+                <option value="">全部</option>
+                <option value="DELE">DELE</option>
+                <option value="SIELE">SIELE</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>级别</label>
+            <select class="filter-select" id="speakingFilterLevel">
+                <option value="">全部</option>
+                <option value="A1">A1</option>
+                <option value="A2">A2</option>
+                <option value="B1">B1</option>
+                <option value="B2">B2</option>
+                <option value="C1">C1</option>
+                <option value="C2">C2</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Prueba</label>
+            <select class="filter-select" id="speakingFilterPrueba">
+                <option value="">全部</option>
+                <option value="1">Prueba 1</option>
+                <option value="2">Prueba 2</option>
+                <option value="3">Prueba 3</option>
+                <option value="4">Prueba 4</option>
+            </select>
+        </div>
+
+        <div class="filter-group filter-search">
+            <label>搜索</label>
+            <input type="text" class="filter-input" id="speakingFilterSearch" placeholder="搜索标题...">
+        </div>
+
+        <button class="btn btn-secondary" id="btnApplySpeakingFilter" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+            </svg>
+            <span>筛选</span>
+        </button>
+    </div>
+
+    <!-- 任务列表 -->
+    <div class="data-table-container">
+        <table class="data-table" id="speakingTasksTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>标题</th>
+                    <th>考试类型</th>
+                    <th>级别</th>
+                    <th>Prueba</th>
+                    <th>任务编号</th>
+                    <th>媒体</th>
+                    <th>创建时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="speakingTasksBody">
+                <!-- JS 动态填充 -->
+            </tbody>
+        </table>
+
+        <div class="table-empty hidden" id="speakingTasksEmpty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            </svg>
+            <p>暂无口语任务</p>
+            <button class="btn btn-primary" type="button" onclick="showSpeakingTaskModal()">
+                创建第一个任务
+            </button>
+        </div>
+
+        <div class="table-loading hidden" id="speakingTasksLoading">
+            <div class="loading-spinner"></div>
+            <p>加载中...</p>
+        </div>
+    </div>
+
+    <div class="pagination" id="speakingTasksPagination"></div>
+</section>
+
+<!-- ==================== 口语任务模态框 ==================== -->
+<div class="modal-overlay hidden" id="speakingTaskModal">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h3 id="speakingModalTitle">新建口语任务</h3>
+            <button class="modal-close" type="button" onclick="closeSpeakingTaskModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <form id="speakingTaskForm">
+                <input type="hidden" id="speakingTaskId" name="taskId">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="speakingExamType">考试类型 <span class="required">*</span></label>
+                        <select id="speakingExamType" name="exam_type" required>
+                            <option value="DELE">DELE</option>
+                            <option value="SIELE">SIELE</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="speakingLevel">级别 <span class="required">*</span></label>
+                        <select id="speakingLevel" name="level" required>
+                            <option value="A1">A1</option>
+                            <option value="A2">A2</option>
+                            <option value="B1">B1</option>
+                            <option value="B2">B2</option>
+                            <option value="C1">C1</option>
+                            <option value="C2">C2</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="speakingPrueba">Prueba</label>
+                        <select id="speakingPrueba" name="prueba">
+                            <option value="">无</option>
+                            <option value="1">Prueba 1</option>
+                            <option value="2">Prueba 2</option>
+                            <option value="3">Prueba 3</option>
+                            <option value="4">Prueba 4</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="speakingTaskNumber">任务编号</label>
+                        <input type="number" id="speakingTaskNumber" name="task_number" placeholder="1" min="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="speakingSection">部分名称</label>
+                        <input type="text" id="speakingSection" name="section" placeholder="Tarea 1">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="speakingTitle">任务标题 <span class="required">*</span></label>
+                    <input type="text" id="speakingTitle" name="title" placeholder="例如：描述一张图片" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="speakingDescription">题目描述 (HTML)</label>
+                    <textarea id="speakingDescription" name="description_html" rows="4" placeholder="任务场景描述..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="speakingInstructions">口语指导 (HTML)</label>
+                    <textarea id="speakingInstructions" name="instructions_html" rows="4" placeholder="具体口语指令..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="speakingVocabulary">推荐词汇 (HTML)</label>
+                    <textarea id="speakingVocabulary" name="vocabulary_html" rows="3" placeholder="推荐词汇和短语..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="speakingStrategy">答题策略 (HTML)</label>
+                    <textarea id="speakingStrategy" name="strategy_html" rows="3" placeholder="口语策略和建议..."></textarea>
+                </div>
+
+                <!-- 音频上传区域 -->
+                <div class="form-group">
+                    <label>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="vertical-align: middle; margin-right: 4px;">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                        </svg>
+                        音频材料
+                    </label>
+
+                    <div class="audio-upload-area" id="speakingAudioUploadArea">
+                        <div class="audio-preview-list" id="speakingAudioPreviewList"></div>
+
+                        <div class="audio-upload-box" id="speakingAudioUploadBox">
+                            <input type="file" id="speakingAudioInput" accept="audio/*" multiple hidden>
+                            <div class="upload-placeholder" onclick="document.getElementById('speakingAudioInput').click()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                </svg>
+                                <span>点击或拖拽上传音频文件</span>
+                                <small>支持 MP3、WAV、M4A、OGG、FLAC、AAC，最大 50MB</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="audio-upload-hint">
+                        <span id="speakingAudioCountHint">已关联 0 个音频</span>
+                    </div>
+                </div>
+
+                <!-- 图片上传区域 -->
+                <div class="form-group">
+                    <label>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="vertical-align: middle; margin-right: 4px;">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21 15 16 10 5 21"></polyline>
+                        </svg>
+                        相关图片
+                    </label>
+
+                    <div class="image-upload-area" id="speakingImageUploadArea">
+                        <div class="image-preview-list" id="speakingImagePreviewList"></div>
+
+                        <div class="image-upload-box" id="speakingImageUploadBox">
+                            <input type="file" id="speakingImageInput" accept="image/*" multiple hidden>
+                            <div class="upload-placeholder" onclick="document.getElementById('speakingImageInput').click()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                    <polyline points="21 15 16 10 5 21"></polyline>
+                                </svg>
+                                <span>点击或拖拽上传图片</span>
+                                <small>支持 JPG、PNG、GIF、WEBP，最大 10MB</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-upload-hint">
+                        <span id="speakingImageCountHint">已选择 0 张图片</span>
+                    </div>
+                </div>
+
+                <!-- Flow JSON 配置（高级） -->
+                <div class="form-group">
+                    <label for="speakingFlowJson">
+                        流程配置 (JSON)
+                        <button type="button" class="btn-toggle-advanced" onclick="toggleAdvancedField('speakingFlowJsonContainer')">
+                            展开
+                        </button>
+                    </label>
+                    <div id="speakingFlowJsonContainer" class="hidden">
+                        <textarea id="speakingFlowJson" name="flow_json" rows="4" placeholder='{"steps": []}'></textarea>
+                        <small class="form-hint">定义口语任务的步骤流程</small>
+                    </div>
+                </div>
+
+                <!-- Structure JSON 配置（高级） -->
+                <div class="form-group">
+                    <label for="speakingStructureJson">
+                        结构配置 (JSON)
+                        <button type="button" class="btn-toggle-advanced" onclick="toggleAdvancedField('speakingStructureJsonContainer')">
+                            展开
+                        </button>
+                    </label>
+                    <div id="speakingStructureJsonContainer" class="hidden">
+                        <textarea id="speakingStructureJson" name="structure_json" rows="4" placeholder='{"sections": []}'></textarea>
+                        <small class="form-hint">定义口语任务的结构</small>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeSpeakingTaskModal()">取消</button>
+            <button type="button" class="btn btn-primary" id="btnSaveSpeakingTask">
+                <span class="btn-text">保存</span>
+                <span class="btn-loader hidden">
+                    <svg class="spinner" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"></circle>
+                    </svg>
+                </span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 音频角色选择模态框 ==================== -->
+<div class="modal-overlay hidden" id="speakingAudioRoleModal">
+    <div class="modal modal-sm">
+        <div class="modal-header">
+            <h3>选择音频角色</h3>
+            <button class="modal-close" type="button" onclick="closeSpeakingAudioRoleModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="speakingAudioRoleSelect">音频角色</label>
+                <select id="speakingAudioRoleSelect">
+                    <option value="instruction">指令音频 (Instruction)</option>
+                    <option value="question">问题音频 (Question)</option>
+                    <option value="example">示例音频 (Example)</option>
+                    <option value="prompt">提示音频 (Prompt)</option>
+                    <option value="dialogue">对话音频 (Dialogue)</option>
+                    <option value="beep">提示音 (Beep)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="speakingAudioTitleInput">音频标题</label>
+                <input type="text" id="speakingAudioTitleInput" placeholder="输入音频标题...">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeSpeakingAudioRoleModal()">取消</button>
+            <button type="button" class="btn btn-primary" id="btnConfirmAudioRole">确认</button>
+        </div>
+    </div>
+</div>

@@ -1,4 +1,8 @@
-<!-- 仪表盘页面 -->
+<!-- ============================================
+     Dashboard 仪表盘页面
+     文件: pages/dashboard.html
+     ============================================ -->
+
 <section class="page-content" id="page-dashboard">
     <div class="dashboard-stats">
         <div class="stat-card">
@@ -13,20 +17,22 @@
                 <span class="stat-label">写作任务</span>
             </div>
         </div>
+        
         <div class="stat-card">
             <div class="stat-icon" style="background: linear-gradient(135deg, #3498db 0%, #5dade2 100%);">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                    <path d="M12 2C8 2 2 4 2 10c0 7 10 12 10 12s10-5 10-12c0-6-6-8-10-8z"/>
+                    <circle cx="12" cy="10" r="3"/>
                 </svg>
             </div>
             <div class="stat-info">
-                <span class="stat-value" id="statReadingPassages">-</span>
-                <span class="stat-label">阅读材料</span>
+                <span class="stat-value" id="statListening">-</span>
+                <span class="stat-label">听力内容</span>
             </div>
         </div>
+        
         <div class="stat-card">
-            <div class="stat-icon" style="background: linear-gradient(135deg, #f4a261 0%, #e9c46a 100%);">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
                     <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
@@ -37,8 +43,9 @@
                 <span class="stat-label">故事数量</span>
             </div>
         </div>
+        
         <div class="stat-card">
-            <div class="stat-icon" style="background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #f4a261 0%, #e9c46a 100%);">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                     <circle cx="12" cy="10" r="3"/>
@@ -50,32 +57,47 @@
             </div>
         </div>
     </div>
-    
-    <div class="dashboard-welcome">
-        <h2>欢迎回来！</h2>
-        <p>使用左侧导航栏管理您的西班牙语学习内容。</p>
+
+    <!-- 快捷操作 -->
+    <div class="dashboard-section">
+        <h3 class="section-title">快捷操作</h3>
+        <div class="quick-actions">
+            <button class="quick-action-btn" onclick="navigateTo('writing')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                新建写作任务
+            </button>
+            <button class="quick-action-btn" onclick="navigateTo('listening')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                新建听力内容
+            </button>
+            <button class="quick-action-btn" onclick="navigateTo('stories')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                新建故事
+            </button>
+        </div>
+    </div>
+
+    <!-- 最近活动 -->
+    <div class="dashboard-section">
+        <h3 class="section-title">最近活动</h3>
+        <div class="activity-list" id="recentActivity">
+            <div class="activity-empty">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <p>暂无最近活动</p>
+            </div>
+        </div>
     </div>
 </section>
-
-<script>
-// 仪表盘初始化逻辑
-(function() {
-    'use strict';
-    
-    // 加载统计数据
-    async function loadDashboardStats() {
-        try {
-            // TODO: 实际调用 API 获取统计数据
-            document.getElementById('statWritingTasks').textContent = '12';
-            document.getElementById('statReadingPassages').textContent = '8';
-            document.getElementById('statStories').textContent = '15';
-            document.getElementById('statPlaces').textContent = '6';
-        } catch (error) {
-            console.error('加载统计数据失败:', error);
-        }
-    }
-    
-    // 页面加载完成后初始化
-    loadDashboardStats();
-})();
-</script>

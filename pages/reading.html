@@ -1,0 +1,59 @@
+<!-- ============================================
+     Reading 阅读材料管理页面
+     文件: pages/reading.html
+     ============================================ -->
+
+<section class="page-content" id="page-reading">
+    <div class="page-header">
+        <div class="page-header-left">
+            <h2>阅读材料管理</h2>
+            <p class="page-description">管理 DELE/SIELE 考试的阅读理解材料</p>
+        </div>
+        <div class="page-header-right">
+            <button class="btn btn-primary" onclick="openReadingModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                新建阅读材料
+            </button>
+        </div>
+    </div>
+
+    <!-- 开发中提示 -->
+    <div class="development-placeholder">
+        <div class="placeholder-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+        </div>
+        <h3>阅读模块开发中</h3>
+        <p>此功能正在开发中，敬请期待...</p>
+    </div>
+</section>
+
+<!-- ==================== 阅读材料模态框（预留） ==================== -->
+<div class="modal-overlay hidden" id="readingModal">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h3 id="readingModalTitle">新建阅读材料</h3>
+            <button class="modal-close" onclick="closeReadingModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="readingForm">
+                <!-- 表单内容预留 -->
+                <p class="text-muted">表单内容待开发...</p>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeReadingModal()">取消</button>
+            <button type="button" class="btn btn-primary" onclick="saveReading()">保存</button>
+        </div>
+    </div>
+</div>

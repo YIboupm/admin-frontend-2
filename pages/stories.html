@@ -1,0 +1,59 @@
+<!-- ============================================
+     Stories 故事管理页面
+     文件: pages/stories.html
+     ============================================ -->
+
+<section class="page-content" id="page-stories">
+    <div class="page-header">
+        <div class="page-header-left">
+            <h2>故事管理</h2>
+            <p class="page-description">管理西班牙语学习故事和分级阅读内容</p>
+        </div>
+        <div class="page-header-right">
+            <button class="btn btn-primary" onclick="openStoryModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                新建故事
+            </button>
+        </div>
+    </div>
+
+    <!-- 开发中提示 -->
+    <div class="development-placeholder">
+        <div class="placeholder-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+        </div>
+        <h3>故事模块开发中</h3>
+        <p>此功能正在开发中，敬请期待...</p>
+    </div>
+</section>
+
+<!-- ==================== 故事模态框（预留） ==================== -->
+<div class="modal-overlay hidden" id="storyModal">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h3 id="storyModalTitle">新建故事</h3>
+            <button class="modal-close" onclick="closeStoryModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="storyForm">
+                <!-- 表单内容预留 -->
+                <p class="text-muted">表单内容待开发...</p>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeStoryModal()">取消</button>
+            <button type="button" class="btn btn-primary" onclick="saveStory()">保存</button>
+        </div>
+    </div>
+</div>
