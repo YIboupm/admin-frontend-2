@@ -31,17 +31,30 @@
             </select>
         </div>
 
-        <div class="filter-group">
-            <label>级别</label>
-            <select class="filter-select" id="speakingFilterLevel">
-                <option value="">全部</option>
-                <option value="A1">A1</option>
-                <option value="A2">A2</option>
-                <option value="B1">B1</option>
-                <option value="B2">B2</option>
-                <option value="C1">C1</option>
-                <option value="C2">C2</option>
-            </select>
+        <!-- 级别（仅 DELE 用） -->
+        <div class="filter-group" id="speakingFilterLevelGroup">
+        <label>级别</label>
+        <select class="filter-select" id="speakingFilterLevel">
+            <option value="">全部</option>
+            <option value="A1">A1</option>
+            <option value="A2">A2</option>
+            <option value="B1">B1</option>
+            <option value="B2">B2</option>
+            <option value="C1">C1</option>
+            <option value="C2">C2</option>
+        </select>
+        </div>
+
+        <!-- Tarea / 任务编号（SIELE 主要用，DELE 也可以用） -->
+        <div class="filter-group" id="speakingFilterTaskNumberGroup">
+        <label>Tarea</label>
+        <select class="filter-select" id="speakingFilterTaskNumber">
+            <option value="">全部</option>
+            <option value="1">Tarea 1</option>
+            <option value="2">Tarea 2</option>
+            <option value="3">Tarea 3</option>
+            <option value="4">Tarea 4</option>
+        </select>
         </div>
 
         <div class="filter-group">
@@ -135,7 +148,7 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" id="speakingLevelGroup">
                         <label for="speakingLevel">级别 <span class="required">*</span></label>
                         <select id="speakingLevel" name="level" required>
                             <option value="A1">A1</option>
@@ -160,9 +173,16 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label for="speakingTaskNumber">任务编号</label>
-                        <input type="number" id="speakingTaskNumber" name="task_number" placeholder="1" min="1">
+                    <div class="form-group" id="speakingTaskNumberGroup">
+                        <label for="speakingTaskNumber">Tarea</label>
+                        <select id="speakingTaskNumber" name="task_number">
+                            <option value="">无</option>
+                            <option value="1">Tarea 1</option>
+                            <option value="2">Tarea 2</option>
+                            <option value="3">Tarea 3</option>
+                            <option value="4">Tarea 4</option>
+                            <option value="4">Tarea 5</option>
+                        </select>
                     </div>
 
                     <div class="form-group">
@@ -273,7 +293,61 @@
                         <small class="form-hint">定义口语任务的步骤流程</small>
                     </div>
                 </div>
+                <!-- ==================== SIELE T4/T5 组合题模块（可选） ==================== -->
+                <div class="form-group" id="speakingSiele45Builder">
+                <label style="display:flex;align-items:center;gap:10px;">
+                    <input type="checkbox" id="enableSiele45Builder">
+                    <span>启用 SIELE Prueba 4 - Tarea 4/5 组合题模板（自动生成结构 JSON）</span>
+                </label>
 
+                <div id="siele45Panel" class="hidden" style="margin-top:10px;border:1px solid #eee;padding:12px;border-radius:10px;">
+                    
+                    <div class="form-row">
+                    <div class="form-group" style="flex:1;">
+                        <label>Tarea 4 标题（reading_title）</label>
+                        <input type="text" id="siele45ReadingTitle" placeholder="例如：LAS ENERGÍAS RENOVABLES">
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>显示标签（可选）</label>
+                        <input type="text" id="siele45Label" placeholder="例如：Tarea 4/5">
+                    </div>
+                    </div>
+
+                    <div class="form-group">
+                    <label>Tarea 4 阅读文本（reading_text）</label>
+                    <textarea id="siele45ReadingText" rows="6" placeholder="把书上的阅读段落粘贴进来（纯文本即可）"></textarea>
+                    <small class="form-hint">管理员只需要粘贴文本，不用写 HTML。</small>
+                    </div>
+
+                    <div class="form-row">
+                    <div class="form-group" style="flex:1;">
+                        <label>Tarea 5 - Opción 1</label>
+                        <textarea id="siele45Option1" rows="3" placeholder="粘贴 Opción 1 的框内容"></textarea>
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>Tarea 5 - Opción 2</label>
+                        <textarea id="siele45Option2" rows="3" placeholder="粘贴 Opción 2 的框内容"></textarea>
+                    </div>
+                    </div>
+
+                    <div class="form-row">
+                    <div class="form-group" style="flex:1;">
+                        <label>准备时间（秒）</label>
+                        <input type="number" id="siele45PrepSec" value="120" min="0">
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>作答时间（秒）</label>
+                        <input type="number" id="siele45SpeakSec" value="240" min="0">
+                    </div>
+                    </div>
+
+                    <div class="form-group" style="display:flex;gap:10px;">
+                    <button type="button" class="btn btn-secondary" id="btnSiele45BuildJson">生成/更新结构 JSON</button>
+                    <small class="form-hint" style="align-self:center;">生成后会自动写入下面的“结构配置(JSON)”</small>
+                    </div>
+
+                </div>
+                </div>
                 <!-- Structure JSON 配置（高级） -->
                 <div class="form-group">
                     <label for="speakingStructureJson">

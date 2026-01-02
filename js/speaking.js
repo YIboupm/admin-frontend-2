@@ -106,6 +106,8 @@ function bindSpeakingEvents() {
     if (btnConfirmRole) {
         btnConfirmRole.addEventListener('click', confirmAudioRole);
     }
+    // SIELE T4/T5 组合题模块（自动生成 structure_json）
+    initSiele45Builder();
 }
 
 // ==================== 图片上传 ====================
@@ -658,7 +660,7 @@ function showSpeakingTaskModal(task = null) {
         document.getElementById('speakingStrategy').value = task.strategy_html || '';
         document.getElementById('speakingFlowJson').value = JSON.stringify(task.flow_json || {}, null, 2);
         document.getElementById('speakingStructureJson').value = JSON.stringify(task.structure_json || {}, null, 2);
-        
+        fillSiele45BuilderFromTask(task);
         // 加载已有图片
         if (task.images?.length > 0) {
             SpeakingState.existingImages = task.images.map(img => ({
@@ -731,6 +733,14 @@ async function saveSpeakingTask() {
         return;
     }
     
+       // 如果启用了 SIELE T4/T5 Builder，则保存前强制生成 structure_json
+    const sieleToggle = document.getElementById('enableSiele45Builder');
+    if (sieleToggle?.checked) {
+        const ok = buildSiele45StructureJson(true);
+        if (!ok) return; // 校验不通过就阻止保存
+    }
+
+
     // 解析 JSON 字段
     let flowJson = {};
     let structureJson = {};
@@ -927,6 +937,127 @@ async function deleteSpeakingTask(taskId) {
         Utils.showToast('删除失败', 'error');
     }
 }
+
+
+// ==================== SIELE T4/T5 Builder（模块化结构配置） ====================
+
+function initSiele45Builder() {
+    const toggle = document.getElementById('enableSiele45Builder');
+    const panel = document.getElementById('siele45Panel');
+    const btn = document.getElementById('btnSiele45BuildJson');
+
+    if (!toggle || !panel || !btn) return;
+
+    toggle.addEventListener('change', () => {
+        panel.classList.toggle('hidden', !toggle.checked);
+        if (toggle.checked) buildSiele45StructureJson(true); // 勾选就生成一次（静默）
+    });
+
+    btn.addEventListener('click', () => buildSiele45StructureJson(false));
+
+    // 输入时实时更新（静默）
+    [
+        'siele45ReadingTitle', 'siele45Label', 'siele45ReadingText',
+        'siele45Option1', 'siele45Option2', 'siele45PrepSec', 'siele45SpeakSec'
+    ].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', () => {
+            if (toggle.checked) buildSiele45StructureJson(true);
+        });
+    });
+}
+
+/**
+ * 将模块表单内容写入 speakingStructureJson textarea
+ * silent=true 不弹 Toast
+ */
+function buildSiele45StructureJson(silent = false) {
+    const title = document.getElementById('siele45ReadingTitle')?.value?.trim() || '';
+    const label = document.getElementById('siele45Label')?.value?.trim() || 'Tarea 4/5';
+    const readingText = document.getElementById('siele45ReadingText')?.value?.trim() || '';
+    const op1 = document.getElementById('siele45Option1')?.value?.trim() || '';
+    const op2 = document.getElementById('siele45Option2')?.value?.trim() || '';
+    const prep = parseInt(document.getElementById('siele45PrepSec')?.value || '120', 10);
+    const speak = parseInt(document.getElementById('siele45SpeakSec')?.value || '240', 10);
+
+    // 最小校验：阅读 + 两个选项
+    if (!readingText || !op1 || !op2) {
+        if (!silent) Utils.showToast('请至少填写：阅读文本 + Opción 1 + Opción 2', 'warning');
+        return false;
+    }
+
+    const structure = {
+        variant: "siele_t4_t5_combo",
+        label: label,
+        parts: [
+            {
+                part: "tarea4",
+                label: "Tarea 4",
+                ui: "reading_with_questions",
+                reading_title: title || null,
+                reading_text: readingText,
+                time_rule: "1min_per_question"
+            },
+            {
+                part: "tarea5",
+                label: "Tarea 5",
+                ui: "choose_and_argue",
+                depends_on: "tarea4",
+                prep_time_sec: Number.isFinite(prep) ? prep : 120,
+                speak_time_sec: Number.isFinite(speak) ? speak : 240,
+                options: [
+                    { id: "op1", title: "OPCIÓN 1", text: op1 },
+                    { id: "op2", title: "OPCIÓN 2", text: op2 }
+                ]
+            }
+        ]
+    };
+
+    const textarea = document.getElementById('speakingStructureJson');
+    if (textarea) textarea.value = JSON.stringify(structure, null, 2);
+
+    if (!silent) Utils.showToast('结构 JSON 已生成', 'success');
+    return true;
+}
+
+/**
+ * 编辑任务时：如果结构是 siele_t4_t5_combo，则回填到 Builder
+ */
+function fillSiele45BuilderFromTask(task) {
+    const toggle = document.getElementById('enableSiele45Builder');
+    const panel = document.getElementById('siele45Panel');
+
+    if (!toggle || !panel) return;
+
+    const s = task?.structure_json || {};
+    if (!s || s.variant !== 'siele_t4_t5_combo') {
+        // 不是组合题：关掉面板（避免干扰）
+        toggle.checked = false;
+        panel.classList.add('hidden');
+        return;
+    }
+
+    toggle.checked = true;
+    panel.classList.remove('hidden');
+
+    const parts = Array.isArray(s.parts) ? s.parts : [];
+    const p4 = parts.find(x => x.part === 'tarea4') || {};
+    const p5 = parts.find(x => x.part === 'tarea5') || {};
+    const opts = Array.isArray(p5.options) ? p5.options : [];
+
+    document.getElementById('siele45ReadingTitle').value = p4.reading_title || '';
+    document.getElementById('siele45Label').value = s.label || 'Tarea 4/5';
+    document.getElementById('siele45ReadingText').value = p4.reading_text || '';
+    document.getElementById('siele45Option1').value = (opts.find(o => o.id === 'op1')?.text) || (opts[0]?.text || '');
+    document.getElementById('siele45Option2').value = (opts.find(o => o.id === 'op2')?.text) || (opts[1]?.text || '');
+    document.getElementById('siele45PrepSec').value = p5.prep_time_sec ?? 120;
+    document.getElementById('siele45SpeakSec').value = p5.speak_time_sec ?? 240;
+
+    // 回填后再生成一次，保证 textarea 同步
+    buildSiele45StructureJson(true);
+}
+
+
 
 // ==================== 暴露到全局 ====================
 window.initSpeakingModule = initSpeakingModule;
