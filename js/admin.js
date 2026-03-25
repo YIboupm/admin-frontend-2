@@ -52,13 +52,18 @@ const PAGE_CONFIG = {
         file: 'pages/countries.html',
         init: 'initCountriesModule'
     },
+    daily_sentences: {
+        title: '每日一句',
+        file: 'pages/daily_sentences.html',
+        init: 'initDailySentencesModule'
+    },
 };
 
 // 初始化
 document.addEventListener('DOMContentLoaded', function() {
     // 检查登录状态
     if (!Utils.isAuthenticated()) {
-        window.location.href = 'login.html';
+        window.location.href = Utils.getPageUrl('login.html');
         return;
     }
     
@@ -115,6 +120,7 @@ function initNavigation() {
 async function navigateTo(page) {
     if (!PAGE_CONFIG[page]) {
         console.warn('Unknown page:', page);
+        console.log('Available pages:', Object.keys(PAGE_CONFIG));
         return;
     }
     
@@ -301,7 +307,7 @@ function initLogout() {
         logoutBtn.addEventListener('click', function() {
             if (confirm('确定要退出登录吗？')) {
                 Utils.clearAuth();
-                window.location.href = 'login.html';
+                window.location.href = Utils.getPageUrl('login.html');
             }
         });
     }

@@ -321,8 +321,8 @@ function updateToggleModeButton() {
 
 // ========== 可视化编辑器渲染 ==========
 function renderVisualEditor() {
-    const container = document.getElementById('tareaQuestionsVisualEditor');
-    const jsonEditor = document.getElementById('tareaQuestionsJsonEditor');
+    const container = document.getElementById('questionsEditorLayout');
+    const jsonEditor = document.getElementById('questionsJsonEditor');
     
     container.classList.remove('hidden');
     jsonEditor.classList.add('hidden');
@@ -1082,8 +1082,8 @@ function renderTrueFalseEditor(block, idx) {
 
 // ========== JSON 编辑器 ==========
 function renderJsonEditor() {
-    const container = document.getElementById('tareaQuestionsVisualEditor');
-    const jsonEditor = document.getElementById('tareaQuestionsJsonEditor');
+    const container = document.getElementById('questionsEditorLayout');
+    const jsonEditor = document.getElementById('questionsJsonEditor');
     
     container.classList.add('hidden');
     jsonEditor.classList.remove('hidden');

@@ -424,7 +424,7 @@ function clearAudioState() {
 /**
  * 上传单个音频文件
  */
-async function uploadSingleAudio(taskId, audioData) {
+async function uploadSingleWritingAudio(taskId, audioData) {
     const formData = new FormData();
     formData.append('file', audioData.file);
     formData.append('title', audioData.title || '听力材料');
@@ -470,7 +470,7 @@ async function handleAudioOperations(taskId) {
     const uploadResults = [];
     for (const audio of WritingState.pendingAudios) {
         try {
-            const result = await uploadSingleAudio(taskId, audio);
+            const result = await uploadSingleWritingAudio(taskId, audio);
             uploadResults.push(result);
             
             // 开始轮询处理状态

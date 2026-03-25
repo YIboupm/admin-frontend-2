@@ -4,7 +4,9 @@
 
 const CONFIG = {
     // API 基础地址 - 根据你的后端实际地址修改
-    API_BASE_URL: 'http://127.0.0.1:8000',
+    API_BASE_URL: 'https://xiyubao.onebook2025.top',
+    // 前端页面基础地址
+    APP_BASE_URL: 'https://xiyubao.onebook2025.top',
     
     // 各模块 API 路径
     API: {
@@ -65,6 +67,16 @@ const CONFIG = {
             DETAIL: (id) => `/places/${id}`,
             PARAGRAPHS: (id) => `/places/${id}/paragraphs`,
         },
+        
+        // 每日一句
+        DAILY_SENTENCES: {
+            LIST: '/admin/daily-sentences',
+            CREATE: '/admin/daily-sentences',
+            DETAIL: (id) => `/admin/daily-sentences/${id}`,
+            UPDATE: (id) => `/admin/daily-sentences/${id}`,
+            DELETE: (id) => `/admin/daily-sentences/${id}`,
+        },
+        
         // 口语管理
         
     },
@@ -113,6 +125,14 @@ const Utils = {
      */
     getApiUrl(path) {
         return CONFIG.API_BASE_URL + path;
+    },
+
+    /**
+     * 获取完整的页面 URL
+     */
+    getPageUrl(path) {
+        const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+        return CONFIG.APP_BASE_URL + normalizedPath;
     },
     
     /**
@@ -188,7 +208,7 @@ const Utils = {
         // 如果返回 401，清除认证信息并跳转登录页
         if (response.status === 401) {
             this.clearAuth();
-            window.location.href = 'login.html';
+            window.location.href = this.getPageUrl('login.html');
             throw new Error('认证已过期，请重新登录');
         }
         

@@ -1,6 +1,7 @@
 <!-- ============================================
-     Listening 听力管理页面
+     Listening 听力管理页面 (Fixed Version)
      文件: pages/listening.html
+     修复: 按钮调用正确的函数，移除重复的模态框
      ============================================ -->
 
 <section class="page-content" id="page-listening">
@@ -10,12 +11,13 @@
             <p class="page-description">管理听力练习的音频、题目和相关内容</p>
         </div>
         <div class="page-header-right">
-            <button class="btn btn-primary" onclick="openListeningModal()">
+            <!-- 修复: 调用正确的函数 showTareaModal() -->
+            <button class="btn btn-primary" onclick="showTareaModal()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="12" y1="5" x2="12" y2="19"/>
                     <line x1="5" y1="12" x2="19" y2="12"/>
                 </svg>
-                新建听力内容
+                新建听力 Tarea
             </button>
         </div>
     </div>
@@ -24,7 +26,7 @@
     <div class="filter-bar">
         <div class="filter-group">
             <label>考试类型</label>
-            <select class="filter-select" id="listeningFilterExamType" onchange="filterListening()">
+            <select class="filter-select" id="filterListeningExamType" onchange="applyTareaFilters()">
                 <option value="">全部</option>
                 <option value="DELE">DELE</option>
                 <option value="SIELE">SIELE</option>
@@ -32,7 +34,7 @@
         </div>
         <div class="filter-group">
             <label>级别</label>
-            <select class="filter-select" id="listeningFilterLevel" onchange="filterListening()">
+            <select class="filter-select" id="filterListeningTareaLevel" onchange="applyTareaFilters()">
                 <option value="">全部</option>
                 <option value="A1">A1</option>
                 <option value="A2">A2</option>
@@ -44,14 +46,14 @@
         </div>
         <div class="filter-group">
             <label>搜索</label>
-            <input type="text" class="filter-input" id="listeningFilterSearch" 
-                   placeholder="输入标题..." oninput="filterListening()">
+            <input type="text" class="filter-input" id="filterListeningTareaSearch" 
+                   placeholder="输入标题..." oninput="applyTareaFilters()">
         </div>
     </div>
 
     <!-- Tarea 列表 -->
     <div class="data-table-container">
-        <table class="data-table">
+        <table class="data-table" id="listeningTareasTable">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -74,20 +76,35 @@
                 </tr>
             </tbody>
         </table>
+
+        <div class="table-empty hidden" id="listeningTareasEmpty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M9 18V5l12-2v13M6 15v4a2 2 0 002 2h10a2 2 0 002-2V8"/>
+                <circle cx="6" cy="18" r="3"/>
+                <circle cx="18" cy="16" r="3"/>
+            </svg>
+            <p>暂无 Tarea</p>
+            <button class="btn btn-primary" onclick="showTareaModal()">创建第一个 Tarea</button>
+        </div>
+
+        <div class="table-loading hidden" id="listeningTareasLoading">
+            <div class="loading-spinner"></div>
+            <p>加载中...</p>
+        </div>
     </div>
 
     <!-- 分页 -->
-    <div class="pagination" id="listeningPagination">
+    <div class="pagination" id="listeningTareasPagination">
         <!-- 动态生成 -->
     </div>
 </section>
 
-<!-- ==================== 听力 Tarea 新建/编辑模态框 ==================== -->
+<!-- ==================== 听力 Tarea 新建/编辑模态框（带音频上传） ==================== -->
 <div class="modal-overlay hidden" id="listeningTareaModal">
     <div class="modal modal-lg">
         <div class="modal-header">
             <h3 id="listeningTareaModalTitle">新建听力 Tarea</h3>
-            <button class="modal-close" onclick="closeListeningTareaModal()">
+            <button class="modal-close" onclick="closeTareaModal()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="18" y1="6" x2="6" y2="18"/>
                     <line x1="6" y1="6" x2="18" y2="18"/>
@@ -144,16 +161,45 @@
                     <label for="listeningInstructions">答题指导 (HTML)</label>
                     <textarea id="listeningInstructions" name="instructions_html" rows="3" placeholder="听前准备或答题技巧..."></textarea>
                 </div>
+
+                <!-- 新增：音频上传区域（仅在编辑模式下显示） -->
+                <div class="form-group audio-upload-section hidden" id="tareaAudioUploadSection">
+                    <label>音频文件（最多 6 个）</label>
+                    <div class="audio-upload-zone-inline">
+                        <div class="upload-dropzone-mini" id="tareaAudioDropzoneInline">
+                            <input type="file" id="tareaAudioFileInputInline" accept="audio/*" multiple hidden>
+                            <div class="dropzone-content-mini" onclick="document.getElementById('tareaAudioFileInputInline').click()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="17 8 12 3 7 8"/>
+                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                </svg>
+                                <span>点击或拖拽上传音频</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 已上传音频列表 -->
+                        <div class="uploaded-audios-inline" id="uploadedAudiosInline">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+                    <small class="form-hint">支持 MP3、WAV、M4A 等格式，单文件最大 50MB</small>
+                </div>
             </form>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="closeListeningTareaModal()">取消</button>
-            <button type="button" class="btn btn-primary" id="btnSaveListeningTarea" onclick="saveListeningTarea()">保存</button>
+            <button type="button" class="btn btn-secondary" onclick="closeTareaModal()">取消</button>
+            <button type="button" class="btn btn-primary" id="btnSaveTarea" onclick="saveTarea()">
+                <span class="btn-text">保存</span>
+                <span class="btn-loader hidden">
+                    <span class="spinner-small"></span>
+                </span>
+            </button>
         </div>
     </div>
 </div>
 
-<!-- ==================== Tarea 音频管理模态框 ==================== -->
+<!-- ==================== Tarea 音频管理模态框（独立窗口） ==================== -->
 <div class="modal-overlay hidden" id="tareaAudiosModal">
     <div class="modal modal-xl">
         <div class="modal-header">

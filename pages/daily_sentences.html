@@ -1,0 +1,300 @@
+<!-- ============================================
+     Daily Sentences 每日一句管理页面
+     文件: pages/daily_sentences.html
+     ============================================ -->
+
+<section class="page-content" id="page-daily_sentences">
+    <div class="page-header">
+        <div class="page-header-left">
+            <h2>每日一句</h2>
+            <p class="page-description">管理每日一句内容（西班牙语/中文对照）</p>
+        </div>
+        <div class="page-header-right">
+            <button class="btn btn-primary" onclick="openDailySentenceModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                新建每日一句
+            </button>
+        </div>
+    </div>
+
+    <!-- 筛选工具栏 -->
+    <div class="filter-toolbar">
+        <div class="filter-group">
+            <label class="checkbox-label">
+                <input type="checkbox" id="includeUnpublished" checked onchange="loadDailySentences()">
+                显示未发布
+            </label>
+        </div>
+    </div>
+
+    <!-- 列表容器 -->
+    <div class="data-table-container" id="dailySentencesTableContainer">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th width="120">日期</th>
+                    <th width="80">配图</th>
+                    <th>西班牙语</th>
+                    <th>中文翻译</th>
+                    <th width="100">状态</th>
+                    <th width="150">操作</th>
+                </tr>
+            </thead>
+            <tbody id="dailySentencesList">
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 空状态 -->
+    <div id="dailySentencesEmpty" class="empty-state hidden" style="padding: 40px; text-align: center; color: #666;">
+        <div class="empty-icon" style="margin-bottom: 20px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width: 64px; height: 64px; color: #cbd5e0;">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+        </div>
+        <h3 style="margin-bottom: 10px; font-size: 18px; font-weight: 500;">暂无每日一句</h3>
+        <p style="margin-bottom: 20px; color: #a0aec0;">点击右上角的"新建每日一句"按钮添加内容</p>
+        <button class="btn btn-primary" onclick="openDailySentenceModal()">立即添加</button>
+    </div>
+</section>
+
+<!-- ==================== 编辑模态框 ==================== -->
+<div class="modal-overlay hidden" id="dailySentenceModal">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h3 id="dailySentenceModalTitle">新建每日一句</h3>
+            <button class="modal-close" onclick="closeDailySentenceModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="dailySentenceForm">
+                <input type="hidden" id="dailySentenceId">
+                <input type="hidden" id="existingImageUrl">
+                <input type="hidden" id="deleteExistingImage" value="false">
+                
+                <!-- 基本信息 -->
+                <div class="form-row" style="display: flex; gap: 16px; align-items: flex-end;">
+                    <div class="form-group" style="flex: 0 0 180px;">
+                        <label class="form-label required">日期</label>
+                        <input type="date" class="form-control" id="sentenceDay" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="sentencePublished">
+                            立即发布
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label required">西班牙语</label>
+                    <textarea class="form-control" id="sentenceEs" rows="3" required placeholder="Escribe la oración en español..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label required">中文翻译</label>
+                    <textarea class="form-control" id="sentenceZh" rows="3" required placeholder="输入中文翻译..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">备注 / 解析</label>
+                    <textarea class="form-control" id="sentenceNote" rows="2" placeholder="语法点、用法说明等..."></textarea>
+                </div>
+
+                <!-- 图片上传区域（支持拖拽） -->
+                <div class="form-group">
+                    <label class="form-label">配图</label>
+                    <div class="image-drop-zone" id="imageDropZone">
+                        <input type="file" id="sentenceImage" accept="image/*" style="display: none;" onchange="handleImageSelect(this)">
+                        
+                        <!-- 预览区域 -->
+                        <div id="imagePreviewContainer" class="image-preview-container hidden">
+                            <img id="imagePreview" src="" alt="预览">
+                            <button type="button" class="btn-remove-image" onclick="removeImage(event)" title="移除图片">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"/>
+                                    <line x1="6" y1="6" x2="18" y2="18"/>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <!-- 上传提示 -->
+                        <div id="imageUploadPrompt" class="image-upload-prompt">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="upload-icon">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            <span class="upload-text">拖拽图片到这里，或 <em>点击选择</em></span>
+                            <small class="upload-hint">支持 JPG, PNG, WebP, GIF（最大 10MB）· 可直接从网页拖图</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 关键词 -->
+                <div class="form-group">
+                    <label class="form-label">关键词 <small style="color: #a0aec0;">(JSON 格式，可选)</small></label>
+                    <textarea class="form-control code-font" id="sentenceKeywords" rows="3" placeholder='[{"lemma": "tener miedo", "zh": "害怕"}]'></textarea>
+                </div>
+
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeDailySentenceModal()">取消</button>
+            <button type="button" class="btn btn-primary" id="saveSentenceBtn" onclick="saveDailySentence()">保存</button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ===== 拖拽上传区域 ===== */
+.image-drop-zone {
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    transition: all 0.2s ease;
+    min-height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: #fafafa;
+}
+
+.image-drop-zone:hover {
+    border-color: #9ca3af;
+    background: #f5f5f5;
+}
+
+/* 拖拽悬停状态 */
+.image-drop-zone.drag-over {
+    border-color: #3b82f6;
+    border-style: solid;
+    background: #eff6ff;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.image-drop-zone.drag-over .upload-icon {
+    color: #3b82f6;
+    transform: scale(1.1);
+}
+
+.image-drop-zone.drag-over .upload-text {
+    color: #3b82f6;
+}
+
+/* 上传提示 */
+.image-upload-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+}
+
+.upload-icon {
+    width: 48px;
+    height: 48px;
+    color: #9ca3af;
+    transition: all 0.2s;
+}
+
+.upload-text {
+    color: #6b7280;
+    font-size: 15px;
+}
+
+.upload-text em {
+    color: #3b82f6;
+    font-style: normal;
+    font-weight: 500;
+}
+
+.upload-hint {
+    color: #9ca3af;
+    font-size: 13px;
+}
+
+/* 图片预览 */
+.image-preview-container {
+    position: relative;
+    display: inline-block;
+}
+
+.image-preview-container img {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.btn-remove-image {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #ef4444;
+    color: white;
+    border: 3px solid white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    transition: transform 0.15s;
+}
+
+.btn-remove-image:hover {
+    transform: scale(1.1);
+    background: #dc2626;
+}
+
+.btn-remove-image svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* 列表缩略图 */
+.thumbnail-cell {
+    width: 50px;
+    height: 50px;
+    border-radius: 6px;
+    object-fit: cover;
+    background: #f3f4f6;
+}
+
+.thumbnail-placeholder {
+    width: 50px;
+    height: 50px;
+    border-radius: 6px;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #d1d5db;
+}
+
+/* 代码字体 */
+.code-font {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 13px;
+}
+
+/* 隐藏类 */
+.hidden {
+    display: none !important;
+}
+</style>

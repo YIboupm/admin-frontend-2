@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // 延迟跳转，确保sessionStorage写入完成
         setTimeout(() => {
             console.log('🔄 跳转到admin.html');
-            window.location.href = 'admin.html';
+            window.location.href = Utils.getPageUrl('admin.html');
         }, 150); // 增加到150ms
         return;
     }
@@ -180,7 +180,7 @@ function handleLoginSuccess(data, email, remember) {
             
             if (savedToken) {
                 console.log('✅ Token已保存，准备跳转');
-                window.location.href = 'admin.html';
+                window.location.href = Utils.getPageUrl('admin.html');
             } else {
                 // 如果token没保存成功，再试一次
                 console.warn('⚠️ Token保存失败，重试...');
@@ -189,7 +189,7 @@ function handleLoginSuccess(data, email, remember) {
                     const retryToken = Utils.getToken();
                     console.log('🔍 重试后token:', retryToken ? '存在' : '不存在');
                     if (retryToken) {
-                        window.location.href = 'admin.html';
+                        window.location.href = Utils.getPageUrl('admin.html');
                     } else {
                         showError('登录信息保存失败，请重试');
                         setLoading(false);

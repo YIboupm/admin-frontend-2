@@ -1,6 +1,7 @@
 /* ===================================
-   听力 Tarea 管理模块 - listening_tareas.js
+   听力 Tarea 管理模块 - listening_tareas.js (Fixed)
    支持多文件上传、批量处理、拖拽排序
+   修复: 函数命名、筛选器ID、内联音频上传
    =================================== */
 
 const ListeningTareasState = {
@@ -30,41 +31,18 @@ function initListeningTareasModule() {
 
     console.log('🎵 Initializing Listening Tareas Module...');
 
-    // 绑定按钮事件
-    const btnAdd = document.getElementById('btnAddTarea');
-    if (btnAdd) {
-        btnAdd.addEventListener('click', function() {
-            showTareaModal();
-        });
-    }
-
-    const btnApply = document.getElementById('btnApplyListeningTareaFilter');
-    if (btnApply) {
-        btnApply.addEventListener('click', applyTareaFilters);
-    }
-
-    // 多文件选择
+    // 多文件选择 - 主模态框
     const fileInput = document.getElementById('tareaAudioFileInput');
     if (fileInput) {
         fileInput.setAttribute('multiple', 'multiple');
         fileInput.addEventListener('change', handleMultipleAudioFilesSelect);
     }
 
-    // 批量上传按钮
-    const btnUpload = document.getElementById('btnUploadTareaAudio');
-    if (btnUpload) {
-        btnUpload.addEventListener('click', function(e) {
-            e.preventDefault();
-            uploadAllPendingAudios();
-        });
-    }
-
-    const btnSave = document.getElementById('btnSaveTarea');
-    if (btnSave) {
-        btnSave.addEventListener('click', function(e) {
-            e.preventDefault();
-            saveTarea();
-        });
+    // 多文件选择 - 内联模态框
+    const fileInputInline = document.getElementById('tareaAudioFileInputInline');
+    if (fileInputInline) {
+        fileInputInline.setAttribute('multiple', 'multiple');
+        fileInputInline.addEventListener('change', handleInlineAudioFilesSelect);
     }
 
     // 初始化拖拽上传
@@ -76,29 +54,44 @@ function initListeningTareasModule() {
 }
 
 function initDragDropUpload() {
-    const uploadBox = document.getElementById('audioUploadBox');
-    if (!uploadBox) return;
+    // 主音频上传区域
+    const uploadBox = document.getElementById('tareaAudioDropzone');
+    if (uploadBox) {
+        setupDropzone(uploadBox, false);
+    }
 
-    uploadBox.addEventListener('dragover', function(e) {
+    // 内联音频上传区域
+    const uploadBoxInline = document.getElementById('tareaAudioDropzoneInline');
+    if (uploadBoxInline) {
+        setupDropzone(uploadBoxInline, true);
+    }
+}
+
+function setupDropzone(element, isInline) {
+    element.addEventListener('dragover', function(e) {
         e.preventDefault();
         e.stopPropagation();
         this.classList.add('drag-over');
     });
 
-    uploadBox.addEventListener('dragleave', function(e) {
+    element.addEventListener('dragleave', function(e) {
         e.preventDefault();
         e.stopPropagation();
         this.classList.remove('drag-over');
     });
 
-    uploadBox.addEventListener('drop', function(e) {
+    element.addEventListener('drop', function(e) {
         e.preventDefault();
         e.stopPropagation();
         this.classList.remove('drag-over');
         
         const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('audio/'));
         if (files.length > 0) {
-            addFilesToPendingList(files);
+            if (isInline) {
+                addFilesToInlineList(files);
+            } else {
+                addFilesToPendingList(files);
+            }
         }
     });
 }
@@ -161,7 +154,13 @@ function renderTareasTable() {
 
     const rows = ListeningTareasState.tareas.map(function(t) {
         const audioCount = t.audio_count || 0;
+        const hasQuestions = t.has_questions || false;
         const createdAt = t.created_at ? Utils.formatDate(new Date(t.created_at * 1000)) : '-';
+        
+        // 题目状态显示
+        const questionsStatus = hasQuestions 
+            ? '<span class="badge badge-success">已配置</span>'
+            : '<span class="badge badge-info">待配置</span>';
         
         return '<tr>' +
             '<td>' + t.id + '</td>' +
@@ -170,6 +169,7 @@ function renderTareasTable() {
             '<td><span class="badge badge-level">' + t.level + '</span></td>' +
             '<td>' + (t.tarea_number || '-') + '</td>' +
             '<td><span class="audio-count ' + (audioCount > 0 ? 'has-audio' : '') + '">' + audioCount + '</span></td>' +
+            '<td>' + questionsStatus + '</td>' +
             '<td>' + createdAt + '</td>' +
             '<td>' +
                 '<div class="action-buttons">' +
@@ -179,7 +179,7 @@ function renderTareasTable() {
                     '<button class="btn-icon" onclick="showTareaModal(' + t.id + ')" title="编辑">' +
                         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
                     '</button>' +
-                    '<button class="btn-icon" onclick="showTareaQuestionsModal(' + t.id + ')" title="题目">' +
+                    '<button class="btn-icon" onclick="showTareaQuestionsModal(' + t.id + ')" title="题目管理">' +
                         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' +
                     '</button>' +
                     '<button class="btn-icon btn-danger" onclick="confirmDeleteTarea(' + t.id + ')" title="删除">' +
@@ -225,6 +225,7 @@ function renderTareasPagination() {
     container.innerHTML = html;
 }
 
+// 修复：匹配 HTML 中的筛选器 ID
 function applyTareaFilters() {
     ListeningTareasState.filters.level = document.getElementById('filterListeningTareaLevel')?.value || '';
     ListeningTareasState.filters.exam_type = document.getElementById('filterListeningExamType')?.value || '';
@@ -232,38 +233,71 @@ function applyTareaFilters() {
     loadTareas(1);
 }
 
+// 兼容旧的函数名
+function filterListening() {
+    applyTareaFilters();
+}
+
 // ==================== Tarea CRUD ====================
 
 function showTareaModal(tareaId) {
-    const modal = document.getElementById('tareaModal');
-    const titleEl = document.getElementById('tareaModalTitle');
-    if (!modal) return;
+    const modal = document.getElementById('listeningTareaModal');
+    const titleEl = document.getElementById('listeningTareaModalTitle');
+    const audioSection = document.getElementById('tareaAudioUploadSection');
+    
+    if (!modal) {
+        console.error('Modal not found: listeningTareaModal');
+        return;
+    }
 
+    // 重置表单
+    document.getElementById('listeningTareaForm')?.reset();
+    
     if (!tareaId) {
-        document.getElementById('tareaId').value = '';
-        document.getElementById('tareaExamType').value = 'DELE';
-        document.getElementById('tareaLevel').value = 'B1';
-        document.getElementById('tareaNumber').value = '1';
-        document.getElementById('tareaTitle').value = '';
-        if (titleEl) titleEl.textContent = '新建 Tarea';
+        // 新建模式
+        document.getElementById('listeningTareaId').value = '';
+        document.getElementById('listeningExamType').value = 'DELE';
+        document.getElementById('listeningLevel').value = 'B1';
+        document.getElementById('listeningTareaNumber').value = '1';
+        document.getElementById('listeningTitle').value = '';
+        document.getElementById('listeningDuration').value = '';
+        document.getElementById('listeningDescription').value = '';
+        document.getElementById('listeningInstructions').value = '';
+        
+        // 隐藏音频上传区域（新建时先保存再上传）
+        if (audioSection) audioSection.classList.add('hidden');
+        
+        if (titleEl) titleEl.textContent = '新建听力 Tarea';
         modal.classList.remove('hidden');
         return;
     }
 
-    loadTareaForEdit(tareaId, modal, titleEl);
+    // 编辑模式 - 加载数据
+    loadTareaForEdit(tareaId, modal, titleEl, audioSection);
 }
 
-async function loadTareaForEdit(tareaId, modal, titleEl) {
+async function loadTareaForEdit(tareaId, modal, titleEl, audioSection) {
     try {
         const res = await Utils.fetchWithAuth(CONFIG.API_BASE_URL + '/listening/admin/tareas/' + tareaId);
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const tarea = await res.json();
 
-        document.getElementById('tareaId').value = tarea.id;
-        document.getElementById('tareaExamType').value = tarea.exam_type || 'DELE';
-        document.getElementById('tareaLevel').value = tarea.level || 'B1';
-        document.getElementById('tareaNumber').value = tarea.tarea_number || '1';
-        document.getElementById('tareaTitle').value = tarea.title || '';
+        document.getElementById('listeningTareaId').value = tarea.id;
+        document.getElementById('listeningExamType').value = tarea.exam_type || 'DELE';
+        document.getElementById('listeningLevel').value = tarea.level || 'B1';
+        document.getElementById('listeningTareaNumber').value = tarea.tarea_number || '1';
+        document.getElementById('listeningTitle').value = tarea.title || '';
+        document.getElementById('listeningDuration').value = tarea.duration_minutes || '';
+        document.getElementById('listeningDescription').value = tarea.description || '';
+        document.getElementById('listeningInstructions').value = tarea.instructions_html || '';
+        
+        // 显示音频上传区域
+        if (audioSection) {
+            audioSection.classList.remove('hidden');
+            ListeningTareasState.selectedTarea = tareaId;
+            loadInlineAudios(tareaId);
+        }
+        
         if (titleEl) titleEl.textContent = '编辑 Tarea #' + tarea.id;
         modal.classList.remove('hidden');
     } catch (err) {
@@ -272,19 +306,41 @@ async function loadTareaForEdit(tareaId, modal, titleEl) {
 }
 
 function closeTareaModal() {
-    document.getElementById('tareaModal')?.classList.add('hidden');
+    document.getElementById('listeningTareaModal')?.classList.add('hidden');
+    ListeningTareasState.selectedTarea = null;
+}
+
+// 兼容别名
+function closeListeningTareaModal() {
+    closeTareaModal();
+}
+
+function saveListeningTarea() {
+    saveTarea();
 }
 
 async function saveTarea() {
-    const tareaId = document.getElementById('tareaId')?.value;
+    const tareaId = document.getElementById('listeningTareaId')?.value;
+    const btn = document.getElementById('btnSaveTarea');
+    const btnText = btn?.querySelector('.btn-text');
+    const btnLoader = btn?.querySelector('.btn-loader');
+    
     const data = {
-        level: document.getElementById('tareaLevel')?.value || 'B1',
-        exam_type: document.getElementById('tareaExamType')?.value || 'DELE',
-        tarea_number: parseInt(document.getElementById('tareaNumber')?.value) || 1,
-        title: document.getElementById('tareaTitle')?.value?.trim() || 'Listening Tarea',
+        level: document.getElementById('listeningLevel')?.value || 'B1',
+        exam_type: document.getElementById('listeningExamType')?.value || 'DELE',
+        tarea_number: parseInt(document.getElementById('listeningTareaNumber')?.value) || 1,
+        title: document.getElementById('listeningTitle')?.value?.trim() || 'Listening Tarea',
+        duration_minutes: parseInt(document.getElementById('listeningDuration')?.value) || null,
+        description: document.getElementById('listeningDescription')?.value?.trim() || '',
+        instructions_html: document.getElementById('listeningInstructions')?.value?.trim() || '',
     };
 
     try {
+        // 显示加载状态
+        if (btn) btn.disabled = true;
+        if (btnText) btnText.classList.add('hidden');
+        if (btnLoader) btnLoader.classList.remove('hidden');
+        
         const url = tareaId 
             ? CONFIG.API_BASE_URL + '/listening/admin/tareas/' + tareaId
             : CONFIG.API_BASE_URL + '/listening/admin/tareas';
@@ -296,23 +352,36 @@ async function saveTarea() {
             throw new Error(err.detail || 'HTTP ' + res.status);
         }
 
+        const result = await res.json();
+        
         Utils.showToast(tareaId ? '保存成功' : '创建成功', 'success');
-        closeTareaModal();
-        loadTareas(ListeningTareasState.currentPage);
+        
+        // 如果是新建，询问是否上传音频
+        if (!tareaId && result.id) {
+            closeTareaModal();
+            loadTareas(ListeningTareasState.currentPage);
+            
+            if (confirm('Tarea 创建成功！是否现在上传音频？')) {
+                showTareaAudiosModal(result.id);
+            }
+        } else {
+            closeTareaModal();
+            loadTareas(ListeningTareasState.currentPage);
+        }
     } catch (err) {
         Utils.showToast('保存失败：' + err.message, 'error');
+    } finally {
+        // 恢复按钮状态
+        if (btn) btn.disabled = false;
+        if (btnText) btnText.classList.remove('hidden');
+        if (btnLoader) btnLoader.classList.add('hidden');
     }
 }
 
 function confirmDeleteTarea(tareaId) {
-    const modal = document.getElementById('confirmDeleteModal');
-    if (!modal) return;
-    
-    const msgEl = modal.querySelector('.confirm-message p');
-    if (msgEl) msgEl.textContent = '确定要删除 Tarea #' + tareaId + ' 吗？关联的音频和题目也会被删除。';
-    
-    modal.classList.remove('hidden');
-    document.getElementById('btnConfirmDelete').onclick = () => deleteTarea(tareaId);
+    if (confirm('确定要删除 Tarea #' + tareaId + ' 吗？关联的音频和题目也会被删除。')) {
+        deleteTarea(tareaId);
+    }
 }
 
 async function deleteTarea(tareaId) {
@@ -321,14 +390,13 @@ async function deleteTarea(tareaId) {
         if (!res.ok) throw new Error('HTTP ' + res.status);
 
         Utils.showToast('删除成功', 'success');
-        document.getElementById('confirmDeleteModal')?.classList.add('hidden');
         loadTareas(1);
     } catch (err) {
         Utils.showToast('删除失败：' + err.message, 'error');
     }
 }
 
-// ==================== Tarea 音频管理 ====================
+// ==================== Tarea 音频管理（独立模态框） ====================
 
 async function showTareaAudiosModal(tareaId) {
     ListeningTareasState.selectedTarea = tareaId;
@@ -429,18 +497,112 @@ async function loadTareaAudios(tareaId) {
     }
 }
 
-// ==================== 多文件上传 ====================
+// ==================== 内联音频列表（编辑模态框内） ====================
+
+async function loadInlineAudios(tareaId) {
+    const container = document.getElementById('uploadedAudiosInline');
+    if (!container) return;
+
+    container.innerHTML = '<div class="loading-inline">加载中...</div>';
+
+    try {
+        const res = await Utils.fetchWithAuth(CONFIG.API_BASE_URL + '/listening/admin/tareas/' + tareaId + '/audios');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        
+        const audios = await res.json();
+        
+        if (audios.length === 0) {
+            container.innerHTML = '<div class="empty-inline">暂无音频</div>';
+            return;
+        }
+
+        audios.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+
+        container.innerHTML = audios.map(function(a, idx) {
+            const statusClass = a.status === 'completed' ? 'success' : 
+                               a.status === 'processing' ? 'warning' : 'info';
+            return '<div class="audio-item-inline">' +
+                '<span class="audio-num">' + (idx + 1) + '</span>' +
+                '<span class="audio-name">' + Utils.escapeHtml(a.title || '音频 ' + (idx + 1)) + '</span>' +
+                '<span class="audio-status status-' + statusClass + '"></span>' +
+                '<button class="btn-remove" onclick="deleteTareaAudioInline(' + tareaId + ', ' + a.id + ')" title="删除">×</button>' +
+            '</div>';
+        }).join('');
+    } catch (err) {
+        container.innerHTML = '<div class="error-inline">加载失败</div>';
+    }
+}
+
+function handleInlineAudioFilesSelect(e) {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    
+    addFilesToInlineList(files);
+    e.target.value = '';
+}
+
+async function addFilesToInlineList(files) {
+    const tareaId = ListeningTareasState.selectedTarea;
+    if (!tareaId) {
+        Utils.showToast('请先保存 Tarea', 'error');
+        return;
+    }
+
+    const maxSize = 50 * 1024 * 1024;
+    
+    for (const file of files) {
+        if (!file.type.startsWith('audio/')) {
+            Utils.showToast(file.name + ' 不是音频文件', 'warning');
+            continue;
+        }
+        if (file.size > maxSize) {
+            Utils.showToast(file.name + ' 超过 50MB', 'warning');
+            continue;
+        }
+
+        // 直接上传
+        try {
+            const title = file.name.replace(/\.[^/.]+$/, '');
+            await uploadSingleAudio(file, title, 0);
+            Utils.showToast(file.name + ' 上传成功', 'success');
+        } catch (err) {
+            Utils.showToast(file.name + ' 上传失败: ' + err.message, 'error');
+        }
+    }
+
+    // 刷新列表
+    loadInlineAudios(tareaId);
+}
+
+async function deleteTareaAudioInline(tareaId, audioId) {
+    if (!confirm('确定删除此音频？')) return;
+
+    try {
+        const res = await Utils.fetchWithAuth(
+            CONFIG.API_BASE_URL + '/listening/admin/tareas/' + tareaId + '/audios/' + audioId,
+            { method: 'DELETE' }
+        );
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+
+        Utils.showToast('删除成功', 'success');
+        loadInlineAudios(tareaId);
+    } catch (err) {
+        Utils.showToast('删除失败：' + err.message, 'error');
+    }
+}
+
+// ==================== 多文件上传（独立模态框） ====================
 
 function handleMultipleAudioFilesSelect(e) {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
     
     addFilesToPendingList(files);
-    e.target.value = ''; // 清空以便重复选择
+    e.target.value = '';
 }
 
 function addFilesToPendingList(files) {
-    const maxSize = 50 * 1024 * 1024; // 50MB
+    const maxSize = 50 * 1024 * 1024;
     const currentAudioCount = ListeningTareasState.tareaAudios.length;
     const pendingCount = ListeningTareasState.pendingAudioFiles.length;
     const maxAllowed = 6 - currentAudioCount - pendingCount;
@@ -469,7 +631,6 @@ function addFilesToPendingList(files) {
             continue;
         }
 
-        // 从文件名生成标题
         const title = file.name.replace(/\.[^/.]+$/, '');
 
         ListeningTareasState.pendingAudioFiles.push({
@@ -482,47 +643,42 @@ function addFilesToPendingList(files) {
 
     if (addedCount > 0) {
         renderPendingFilesUI();
+        showUploadActions();
         Utils.showToast('已添加 ' + addedCount + ' 个文件到待上传列表', 'success');
     }
 }
 
-function renderPendingFilesUI() {
-    let container = document.getElementById('pendingAudiosList');
-    
-    // 如果容器不存在，创建它
-    if (!container) {
-        const uploadSection = document.querySelector('#tareaAudiosContent .form-group');
-        if (!uploadSection) return;
-        
-        container = document.createElement('div');
-        container.id = 'pendingAudiosList';
-        container.className = 'pending-audios-list';
-        uploadSection.insertBefore(container, uploadSection.querySelector('.form-row'));
+function showUploadActions() {
+    const actions = document.getElementById('uploadActions');
+    if (actions && ListeningTareasState.pendingAudioFiles.length > 0) {
+        actions.style.display = 'flex';
     }
+}
+
+function renderPendingFilesUI() {
+    const container = document.getElementById('pendingFilesList');
+    if (!container) return;
 
     if (ListeningTareasState.pendingAudioFiles.length === 0) {
         container.innerHTML = '';
-        container.style.display = 'none';
+        const actions = document.getElementById('uploadActions');
+        if (actions) actions.style.display = 'none';
         return;
     }
 
-    container.style.display = 'block';
-    
-    let html = '<div class="pending-header"><strong>📁 待上传文件 (' + ListeningTareasState.pendingAudioFiles.length + ')</strong><button class="btn btn-sm btn-danger" onclick="clearAllPendingFiles()">清空</button></div>';
-    html += '<div class="pending-items">';
-
-    ListeningTareasState.pendingAudioFiles.forEach(function(item, idx) {
-        html += '<div class="pending-item" data-index="' + idx + '">' +
-            '<div class="pending-item-info">' +
+    container.innerHTML = ListeningTareasState.pendingAudioFiles.map(function(item, idx) {
+        return '<div class="pending-file-item">' +
+            '<div class="pending-file-info">' +
                 '<span class="pending-order">' + item.sortOrder + '</span>' +
-                '<input type="text" class="pending-title-input" value="' + Utils.escapeHtml(item.title) + '" onchange="updatePendingTitle(' + idx + ', this.value)" />' +
+                '<input type="text" class="pending-title" value="' + Utils.escapeHtml(item.title) + '" ' +
+                    'onchange="updatePendingTitle(' + idx + ', this.value)" placeholder="标题">' +
                 '<span class="pending-size">' + formatFileSize(item.file.size) + '</span>' +
             '</div>' +
-            '<div class="pending-item-actions">' +
-                '<button class="btn-sort" onclick="movePendingUp(' + idx + ')" title="上移" ' + (idx === 0 ? 'disabled' : '') + '>' +
+            '<div class="pending-file-actions">' +
+                '<button class="btn-icon" onclick="movePendingUp(' + idx + ')" title="上移" ' + (idx === 0 ? 'disabled' : '') + '>' +
                     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>' +
                 '</button>' +
-                '<button class="btn-sort" onclick="movePendingDown(' + idx + ')" title="下移" ' + (idx === ListeningTareasState.pendingAudioFiles.length - 1 ? 'disabled' : '') + '>' +
+                '<button class="btn-icon" onclick="movePendingDown(' + idx + ')" title="下移" ' + (idx === ListeningTareasState.pendingAudioFiles.length - 1 ? 'disabled' : '') + '>' +
                     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' +
                 '</button>' +
                 '<button class="btn-icon btn-danger" onclick="removePendingFile(' + idx + ')" title="移除">' +
@@ -530,35 +686,31 @@ function renderPendingFilesUI() {
                 '</button>' +
             '</div>' +
         '</div>';
-    });
-
-    html += '</div>';
-    container.innerHTML = html;
+    }).join('');
 }
 
 function clearPendingFilesUI() {
-    const container = document.getElementById('pendingAudiosList');
-    if (container) {
-        container.innerHTML = '';
-        container.style.display = 'none';
-    }
-    const fileInput = document.getElementById('tareaAudioFileInput');
-    if (fileInput) fileInput.value = '';
+    const container = document.getElementById('pendingFilesList');
+    if (container) container.innerHTML = '';
+    
+    const actions = document.getElementById('uploadActions');
+    if (actions) actions.style.display = 'none';
+    
+    ListeningTareasState.pendingAudioFiles = [];
 }
 
-function clearAllPendingFiles() {
-    ListeningTareasState.pendingAudioFiles = [];
+function clearPendingFiles() {
     clearPendingFilesUI();
 }
 
 function removePendingFile(index) {
     ListeningTareasState.pendingAudioFiles.splice(index, 1);
-    // 重新计算 sortOrder
     const baseOrder = ListeningTareasState.tareaAudios.length + 1;
     ListeningTareasState.pendingAudioFiles.forEach((item, idx) => {
         item.sortOrder = baseOrder + idx;
     });
     renderPendingFilesUI();
+    showUploadActions();
 }
 
 function updatePendingTitle(index, title) {
@@ -571,7 +723,6 @@ function movePendingUp(index) {
     if (index <= 0) return;
     const arr = ListeningTareasState.pendingAudioFiles;
     [arr[index - 1], arr[index]] = [arr[index], arr[index - 1]];
-    // 更新 sortOrder
     const baseOrder = ListeningTareasState.tareaAudios.length + 1;
     arr.forEach((item, idx) => { item.sortOrder = baseOrder + idx; });
     renderPendingFilesUI();
@@ -581,7 +732,6 @@ function movePendingDown(index) {
     const arr = ListeningTareasState.pendingAudioFiles;
     if (index >= arr.length - 1) return;
     [arr[index], arr[index + 1]] = [arr[index + 1], arr[index]];
-    // 更新 sortOrder
     const baseOrder = ListeningTareasState.tareaAudios.length + 1;
     arr.forEach((item, idx) => { item.sortOrder = baseOrder + idx; });
     renderPendingFilesUI();
@@ -589,7 +739,7 @@ function movePendingDown(index) {
 
 // ==================== 批量上传 ====================
 
-async function uploadAllPendingAudios() {
+async function uploadPendingFiles() {
     if (!ListeningTareasState.selectedTarea) {
         Utils.showToast('未选择 Tarea', 'error');
         return;
@@ -601,10 +751,10 @@ async function uploadAllPendingAudios() {
         return;
     }
 
-    const btn = document.getElementById('btnUploadTareaAudio');
+    const btn = document.querySelector('#uploadActions .btn-primary');
     if (btn) {
         btn.disabled = true;
-        btn.textContent = '上传中... (0/' + pending.length + ')';
+        btn.innerHTML = '<span class="spinner-small"></span> 上传中... (0/' + pending.length + ')';
     }
 
     let successCount = 0;
@@ -613,7 +763,7 @@ async function uploadAllPendingAudios() {
     for (let i = 0; i < pending.length; i++) {
         const item = pending[i];
         
-        if (btn) btn.textContent = '上传中... (' + (i + 1) + '/' + pending.length + ')';
+        if (btn) btn.innerHTML = '<span class="spinner-small"></span> 上传中... (' + (i + 1) + '/' + pending.length + ')';
 
         try {
             await uploadSingleAudio(item.file, item.title, item.sortOrder);
@@ -626,18 +776,16 @@ async function uploadAllPendingAudios() {
 
     if (btn) {
         btn.disabled = false;
-        btn.textContent = '上传并处理';
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> 开始上传';
     }
 
     // 清空待上传列表
-    ListeningTareasState.pendingAudioFiles = [];
     clearPendingFilesUI();
 
     // 刷新音频列表
     loadTareaAudios(ListeningTareasState.selectedTarea);
     loadTareas(ListeningTareasState.currentPage);
 
-    // 显示结果
     if (failCount === 0) {
         Utils.showToast('全部 ' + successCount + ' 个文件上传成功', 'success');
     } else {
@@ -668,7 +816,6 @@ async function uploadSingleAudio(file, title, sortOrder) {
 
     const result = await res.json();
     
-    // 开始轮询处理状态
     if (result.processing_task_id) {
         startPollingProcessing(result.processing_task_id, result.link_id);
     }
@@ -702,7 +849,6 @@ async function swapAudioOrder(audio1, audio2) {
     const order2 = audio2.sort_order;
 
     try {
-        // 更新两个音频的排序
         await Utils.fetchWithAuth(
             CONFIG.API_BASE_URL + '/listening/admin/tareas/' + tareaId + '/audios/' + audio1.id,
             { method: 'PATCH', body: JSON.stringify({ sort_order: order2 }) }
@@ -712,7 +858,6 @@ async function swapAudioOrder(audio1, audio2) {
             { method: 'PATCH', body: JSON.stringify({ sort_order: order1 }) }
         );
 
-        // 刷新列表
         loadTareaAudios(tareaId);
         Utils.showToast('排序已更新', 'success');
     } catch (err) {
@@ -812,21 +957,40 @@ function formatFileSize(bytes) {
 window.ListeningTareasState = ListeningTareasState;
 window.initListeningTareasModule = initListeningTareasModule;
 window.loadTareas = loadTareas;
+window.applyTareaFilters = applyTareaFilters;
+window.filterListening = filterListening;
+
+// Tarea 模态框
 window.showTareaModal = showTareaModal;
 window.closeTareaModal = closeTareaModal;
 window.saveTarea = saveTarea;
 window.confirmDeleteTarea = confirmDeleteTarea;
+
+// 兼容别名（HTML 中可能用到的名字）
+window.openListeningModal = showTareaModal;
+window.openListeningTareaModal = showTareaModal;
+window.closeListeningTareaModal = closeTareaModal;
+window.saveListeningTarea = saveTarea;
+
+// 音频管理模态框
 window.showTareaAudiosModal = showTareaAudiosModal;
 window.closeTareaAudiosModal = closeTareaAudiosModal;
+window.loadTareaAudios = loadTareaAudios;
 window.deleteTareaAudio = deleteTareaAudio;
+window.deleteTareaAudioInline = deleteTareaAudioInline;
 window.updateTareaAudioTitle = updateTareaAudioTitle;
 window.playMaterial = playMaterial;
+
+// 排序
 window.moveAudioUp = moveAudioUp;
 window.moveAudioDown = moveAudioDown;
+
+// 待上传列表操作
 window.removePendingFile = removePendingFile;
 window.updatePendingTitle = updatePendingTitle;
 window.movePendingUp = movePendingUp;
 window.movePendingDown = movePendingDown;
-window.clearAllPendingFiles = clearAllPendingFiles;
+window.clearPendingFiles = clearPendingFiles;
+window.uploadPendingFiles = uploadPendingFiles;
 
-console.log('✅ listening_tareas.js loaded');
+console.log('✅ listening_tareas.js loaded (fixed version)');
